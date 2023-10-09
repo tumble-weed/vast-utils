@@ -193,3 +193,42 @@ function startgpt ()
 source GENV/bin/activate                                                           │········
 }
 DUTILS='/root/evaluate-saliency-4/dutils/'
+function rsync_to_host() {
+    # Check for at least 2 arguments: source folder and destination host
+    # return 0
+    if [ "$#" -lt 2 ]; then
+        echo "Usage: rsync_to_host <source_folder> <destination_host> [--overwrite]"
+        return 1
+    fi
+
+    # Extract the source folder and destination host from the arguments
+    SOURCE_FOLDER="$1"
+    DESTINATION_HOST="$2"
+    # DESTINATION_HOST="vast-115"
+    SSH_KEY="$HOME/.ssh/shared_with_shubham"
+
+    # Check if the source folder exists
+    if [ ! -d "$SOURCE_FOLDER" ]; then
+        echo "Error: Source folder $SOURCE_FOLDER does not exist!"
+        return 1
+    fi
+    
+    # Build the rsync command
+    # RSYNC_CMD="rsync -avz -e 'ssh -i $SSH_KEY'"
+    #RSYNC_CMD="rsync -avz -e \"ssh -i $SSH_KEY\""
+    RSYNC_CMD="rsync -avz" 
+
+
+    # If the third argument is --overwrite, add the --delete option to the rsync command
+    if [ "$3" == "--overwrite" ]; then
+        RSYNC_CMD="$RSYNC_CMD --delete"
+    fi
+
+    # Append the source and destination to the rsync command and run it
+    echo "${RSYNC_CMD}"
+    fullcmd="${RSYNC_CMD} \"${SOURCE_FOLDER}\" \"${DESTINATION_HOST}:${SOURCE_FOLDER}\""
+    echo $fullcmd
+    #set -x
+    #`$fullcmd`
+    #set +x
+}
