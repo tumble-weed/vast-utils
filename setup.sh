@@ -10,5 +10,5 @@ if ! grep -q "source $DIR/shortcuts.sh" ~/.bashrc; then
 else
     echo "Source line already present in ~/.bashrc"
 fi
-
+touch /root/.no_auto_tmux
 bash install.sh
