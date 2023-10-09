@@ -14,10 +14,10 @@ STABLE=/root/evaluate-saliency-4/stable_diffusion
 function nsmi () {
 nvidia-smi
 }
-
+VASTID="vast-109"
 #if ! [ -v pre_PS1 ]; then
   pre_PS1=PS1
-  PS1="${PS1}(vast-109)"
+  PS1="${PS1}(${VASTID})"
 #fi
 
 function set-title() {
@@ -28,7 +28,7 @@ function set-title() {
   PS1=${ORIG}${TITLE}
 }
 
-set-title vast-109
+set-title $VASTID
 FREQCOM=/root/frequent_commands
 
 function nsmi {
