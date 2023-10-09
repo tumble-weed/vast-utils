@@ -10,3 +10,5 @@ if ! grep -q "source $DIR/shortcuts.sh" ~/.bashrc; then
 else
     echo "Source line already present in ~/.bashrc"
 fi
+
+bash install.sh
