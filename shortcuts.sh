@@ -247,4 +247,5 @@ else
 fi
 unset __conda_setup
 # <<< conda initialize <<<
-
+ELP="/root/evaluate-saliency-4/elp_with_scales"
+VUTILS="/root/vast-utils"
