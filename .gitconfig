@@ -1,0 +1,9 @@
+[user]
+	email = aniketsinghresearch@gmail.com
+	name = Aniket Singh
+[alias]
+	pu = push origin master
+	a = add
+	c = commit -m
+	s = status
+	d = diff HEAD 
