@@ -164,7 +164,7 @@ function startcsm ()
 function startjup () 
 {
  cd /
- tmux new -d -s t-jup jupyter notebook --port 9000 --allow-root --NotebookApp.password="$(echo password | python -c 'from notebook.auth import passwd;print(passwd(input()))')"
+ tmux new -d -s t-jup jupyter notebook --port 8000 --allow-root --NotebookApp.password="$(echo password | python -c 'from notebook.auth import passwd;print(passwd(input()))')"
 
 }
 function startjup_ () 
@@ -172,7 +172,7 @@ function startjup_ ()
 if ! tmux has-session -t t-jup > /dev/null 2>&1; then
 
  cd /
- tmux new -d -s t-jup jupyter notebook --port 9000 --allow-root --NotebookApp.password="$(echo password | python -c 'from notebook.auth import passwd;print(passwd(input()))')"
+ tmux new -d -s t-jup jupyter notebook --port 8000 --allow-root --NotebookApp.password="$(echo password | python -c 'from notebook.auth import passwd;print(passwd(input()))')"
 else
 echo "jupyter session running"
 fi
@@ -190,7 +190,7 @@ ACML="/root/acml-gpnn-paper"
 WAV="/root/wav2lip-banana"
 function startgpt ()
 {
-source GENV/bin/activate                                                           │········
+source GENV/bin/activate
 }
 DUTILS='/root/evaluate-saliency-4/dutils/'
 function rsync_to_host() {
@@ -232,20 +232,16 @@ function rsync_to_host() {
     #`$fullcmd`
     #set +x
 }
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/opt/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/opt/conda/etc/profile.d/conda.sh" ]; then
-        . "/opt/conda/etc/profile.d/conda.sh"
-    else
-        export PATH="/opt/conda/bin:$PATH"
-    fi  
-fi
-unset __conda_setup
-# <<< conda initialize <<<
 ELP="/root/evaluate-saliency-4/elp_with_scales"
 VUTILS="/root/vast-utils"
+TORCHRAYRESULTS="/root/bigfiles/other/results-torchray"
+VSHORT="/root/vast-utils/shortcuts.sh"
+
+# some more ls aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+
+echo "shortcuts.sh done"
+
