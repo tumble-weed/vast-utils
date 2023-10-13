@@ -7,6 +7,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if ! grep -q "source $DIR/shortcuts.sh" ~/.bashrc; then
     echo "VASTID=" >> ~/.bashrc
     echo "source $DIR/shortcuts.sh" >> ~/.bashrc
+    cp "$DIR/.gitconfig" ~/.gitconfig
     echo "Added source line to ~/.bashrc"
 else
     echo "Source line already present in ~/.bashrc"
