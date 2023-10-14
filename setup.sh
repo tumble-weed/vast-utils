@@ -1,5 +1,5 @@
 #!/bin/bash
-
+bash install_rsync.sh
 # Get the directory of the currently executing script
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -14,7 +14,9 @@ else
 fi
 touch /root/.no_auto_tmux
 bash install.sh
-bash install_sh
+bash install_gh.sh
+bash install_kitty.sh
+bash setup_vim.sh
 echo """
 # ~/.profile: executed by Bourne-compatible login shells.
 
@@ -42,3 +44,5 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 """ >> ~/.bashrc
+chmod +x $DIR/vast
+ln -s $DIR/vast /usr/bin/vast

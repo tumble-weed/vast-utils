@@ -30,6 +30,8 @@ if __name__ == "__main__":
             "rsync",
             '-arz',
             # "-avz",  # Adjust your flags as necessary
+            # '--update',
+            '--mkpath',
             "--progress",
             '--copy-links',
             LOCAL_FOLDER.rstrip(os.path.sep)+os.path.sep,
