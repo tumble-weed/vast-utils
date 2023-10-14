@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 touch ~/.no_auto_tmux
 bash install_rsync.sh
 # Get the directory of the currently executing script
@@ -23,3 +24,4 @@ conda init
 bash setup_profile.sh
 chmod +x $DIR/vast
 ln -s $DIR/vast /usr/bin/vast
+set +x
