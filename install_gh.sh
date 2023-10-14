@@ -7,4 +7,4 @@ curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo 
 && sudo apt install gh -y
 )
 
-sudo apt install gh
+sudo apt install gh -y

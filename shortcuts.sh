@@ -84,9 +84,9 @@ git add
 TRASHDIR="/root/.local/share/Trash/files"
 cd $GPNN
 #cd $GROAD
-conda activate gpnnenv
+source activate gpnnenv
 #cd $DIDIR
-#conda activate pytorch3d
+#source activate pytorch3d
 function nonlygen () {
 ls -lah /root/evaluate-saliency-4/GPNN/benchmark/results-librecam/imagenet-gpnn-onlygen-save | wc -l
 }
@@ -129,7 +129,7 @@ GDRIVE="aniketsinghresearch-gdrive"
 SAMDIR="/root/evaluate-saliency-4/fong-invert/segment-anything"
 function startmulti ()
 {
-   cd $MULTIDIR;conda activate gpnnenv
+   cd $MULTIDIR;source activate gpnnenv
 }
 function starttmulti ()
 {
@@ -142,19 +142,19 @@ function starttpr ()
 TRY_MODELNET="/root/evaluate-saliency-4/fong-invert/point-radiance/try_modelnet.ipy"
 function act3d()
 {
-    conda activate pytorch3d
+    source activate pytorch3d
 }
 
 function startbench () 
 {
 cd /root/evaluate-saliency-4/saliency_benchmarking
-conda activate gpnnenv
+source activate gpnnenv
 }
 
 function startgpnn () 
 {
 cd /root/evaluate-saliency-4/GPNN
-conda activate gpnnenv
+source activate gpnnenv
 }
 
 function startcsm () 
