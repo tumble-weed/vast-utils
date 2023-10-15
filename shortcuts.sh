@@ -1,3 +1,8 @@
+if [[ "$0" == "-bash" || "$0" == "-sh" || "$0" == "bash" ]]; then
+  SCRIPT_DIR=$(dirname "${BASH_SOURCE}")
+else
+  SCRIPT_DIR=$(dirname "$0")
+fi
 GPNN=/root/evaluate-saliency-4/GPNN
 BENCH=$GPNN/benchmark2
 GROAD=/root/evaluate-saliency-4/GPNN_for_road
@@ -82,7 +87,7 @@ function gita () {
 git add 
 }
 TRASHDIR="/root/.local/share/Trash/files"
-cd $GPNN
+
 #cd $GROAD
 source activate gpnnenv
 #cd $DIDIR
@@ -178,6 +183,18 @@ echo "jupyter session running"
 fi
 }
 
+function starthttp () 
+{
+if ! tmux has-session -t t-http > /dev/null 2>&1; then
+
+ cd /
+ tmux new -d -s t-http "cd /root; python -m http.server 10000."
+else
+echo "http session running"
+fi
+}
+
+
 GPNNBENCH=$GPNN/benchmark
  
 eval "$(mcfly init bash)"
@@ -242,6 +259,8 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-
+source $SCRIPT_DIR/tmp_alias.sh
 echo "shortcuts.sh done"
 
+cd $ELP
+alias redobash="source /root/.bashrc"

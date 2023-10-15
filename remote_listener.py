@@ -24,6 +24,8 @@ if __name__ == "__main__":
             "rsync",
             '-arz',
             # "-avz",  # Adjust your flags as necessary
+            '--update',
+            '--mkpath',
             "--progress",
             '--copy-links',
             f"{TARGET_HOST}:{REMOTE_FOLDER.rstrip(os.path.sep)+os.path.sep}",

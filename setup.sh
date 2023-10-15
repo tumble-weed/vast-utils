@@ -24,4 +24,5 @@ conda init
 bash setup_profile.sh
 chmod +x $DIR/vast
 ln -s $DIR/vast /usr/bin/vast
+echo "conda activate gpnnenv" >> /root/.bashrc
 set +x
