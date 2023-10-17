@@ -264,3 +264,25 @@ echo "shortcuts.sh done"
 
 cd $ELP
 alias redobash="source /root/.bashrc"
+
+
+alias tmk='kill_tmux_sessions'
+
+kill_tmux_sessions() {
+    for session_name in "$@"; do
+        # Check if the session exists
+        if tmux has-session -t "$session_name" 2>/dev/null; then
+            read -p "Kill Tmux session '$session_name'? (y/n): " answer
+            if [[ "$answer" == "y" || "$answer" == "Y" ]]; then
+                tmux kill-session -t "$session_name"
+                echo "Tmux session '$session_name' killed."
+            else
+                echo "Tmux session '$session_name' not killed."
+            fi
+        else
+            echo "Tmux session '$session_name' not found."
+        fi
+    done
+}
+
+source /root/instance_info.sh
