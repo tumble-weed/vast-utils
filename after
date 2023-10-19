@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Check if the number of arguments is correct
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <pid> <command>"
+    exit 1
+fi
+
+pid="$1"
+command="$2"
+
+# Check if a process with the specified PID exists
+if ! ps -p "$pid" > /dev/null; then
+    echo "Error: Process with PID $pid does not exist."
+    exit 1
+fi
+
+# Run the wait loop in the background
+(
+    while ps -p "$pid" > /dev/null; do
+        sleep 1
+    done
+
+    # Run the specified command after the process ends
+    eval "$command"
+) &
+
+# Disown the background job to prevent SIGHUP
+disown
+
+# Print a message indicating that the background wait has started
+echo "Waiting for process with PID $pid to finish in the background..."

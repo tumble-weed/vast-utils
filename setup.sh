@@ -27,5 +27,5 @@ chmod +x $DIR/vast
 ln -s $DIR/vast /usr/bin/vast
 echo "bash $DIR/setup_tmux.sh" >> /root/.bashrc
 echo "conda activate gpnnenv" >> /root/.bashrc
-
+bash $DIR/add_after.sh
 set +x
