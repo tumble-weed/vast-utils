@@ -3,6 +3,7 @@
 # Check if the number of arguments is correct
 if [ "$#" -ne 2 ]; then
     echo "Usage: $0 <pid> <command>"
+    echo 'after `pgrep -f "^python.*extremal_perturbation"` "bash run-scripts/run_composition_16_2.sh"'
     exit 1
 fi
 
