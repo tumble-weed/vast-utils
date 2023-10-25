@@ -25,7 +25,8 @@ conda init
 bash setup_profile.sh
 chmod +x $DIR/vast
 ln -s $DIR/vast /usr/bin/vast
-echo "bash $DIR/setup_tmux.sh" >> /root/.bashrc
+echo "source $DIR/setup_tmux.sh" >> /root/.bashrc
 echo "conda activate gpnnenv" >> /root/.bashrc
 bash $DIR/add_after.sh
+bash $DIR/setup_code_server.sh
 set +x
