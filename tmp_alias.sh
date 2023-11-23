@@ -2,3 +2,16 @@ alias runsess="cd $ELP; CUDA_VISIBLE_DEVICES=, python -m ipdb -c c examples/attr
 alias s115="ssh vast-115"
 alias s117="ssh vast-117"
 alias s119="ssh vast-119"
+
+function cdresults (){
+    set-title results
+    cd /root/bigfiles/other/results-torchray
+}
+
+alias designkata="vim /root/mykata/design"
+# alias cdkata="cd /root/mykata"
+
+function cdkata (){
+    set-title mykata
+    cd /root/mykata
+}
