@@ -15,6 +15,7 @@ CIFAR=/root/evaluate-saliency-4/GPNN_for_road/road_evaluation/experiments/cifar1
 INVERT=/root/evaluate-saliency-4/fong-invert/
 DI=$INVERT/DeepInversion
 MULTI=$INVERT/../dummy-multithresh
+alias cdmulti="cd $MULTI"
 STABLE=/root/evaluate-saliency-4/stable_diffusion
 function nsmi () {
 nvidia-smi
@@ -168,7 +169,7 @@ function startcsm ()
 }
 function startjup () 
 {
- cd /
+ cd /root
  tmux new -d -s t-jup jupyter notebook --port 8000 --allow-root --NotebookApp.password="$(echo password | python -c 'from notebook.auth import passwd;print(passwd(input()))')"
 
 }
@@ -259,10 +260,13 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
+echo "SCRIPT_DIR"
+echo $SCRIPT_DIR
 source $SCRIPT_DIR/tmp_alias.sh
-echo "shortcuts.sh done"
 
-cd $ELP
+
+#cd $ELP
+cd $GPNN
 alias redobash="source /root/.bashrc"
 
 
@@ -288,3 +292,8 @@ kill_tmux_sessions() {
 source /root/instance_info.sh
 alias pythond='python -m ipdb -c c'
 bash $SCRIPT_DIR/start_services.sh
+echo "shortcuts.sh done"
+alias ...="cd ../../"
+alias ....="cd ../../../"
+alias cdgpnn="cd $GPNN"
+alias cdelp="cd $ELP"
