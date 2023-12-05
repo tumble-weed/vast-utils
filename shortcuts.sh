@@ -297,3 +297,35 @@ alias ...="cd ../../"
 alias ....="cd ../../../"
 alias cdgpnn="cd $GPNN"
 alias cdelp="cd $ELP"
+alias cdelp_utils="cd $ELP/torchray/attribution/elp_utils"
+alias vimhelp="vim /root/myhelp/help.md"
+
+function mycd()
+{
+  # https://github.com/aaronharnly/dotfiles-public/blob/84596ea720234aa5f15152310cc5a95955d6cd84/.bash-functions.sh#L268C1-L295C1
+  history -w # write current history file
+  builtin cd "$@"  # do actual cd
+  local HISTDIR="$HOME/.bash_history.d$PWD" # use nested folders for history
+  if [ ! -d "$HISTDIR" ]; then # create folder if needed
+    mkdir -p "$HISTDIR"
+  fi
+  export HISTFILE="$HISTDIR/${USER}_bash_history.txt" # set new history file
+  history -c  # clear memory
+  history -r #read from current histfile
+
+#  # if we're entering a project directory, check for a virtualenv
+#  this_dir=$(basename "$PWD")
+#  parent_dir=$(dirname "$PWD")
+#  if [ ! -z "$PROJECT_HOME" -a "$parent_dir" == "$PROJECT_HOME" ]; then
+#    if [ -z "$WORKINGON" ]; then
+#      if [ -d "$WORKON_HOME/${this_dir}" ]; then
+#          echo "Activating virtualenv $this_dir..."
+#          export WORKINGON="$this_dir"
+#          workon "${this_dir}"
+#      fi
+#    fi
+#  else
+#    unset WORKINGON
+#  fi
+}
+
