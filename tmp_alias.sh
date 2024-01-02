@@ -15,3 +15,8 @@ function cdkata (){
     set-title mykata
     cd /root/mykata
 }
+alias trymulti="cd /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency/;python run_multithresh_saliency.py"
+#alias cdelp="cd /root/evaluate-saliency-4/elp_with_scales"
+#alias cdmulti="cd /root/evaluate-saliency-4/multithresh-saliency"
+alias trydutils='python -c "import dutils"'
+alias vimtodo="vim /root/todo"
