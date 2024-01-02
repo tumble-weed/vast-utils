@@ -1,2 +1,1 @@
-curl -fsSL https://code-server.dev/install.sh | sh
-
+/root/.config/code-server/config.yaml 
