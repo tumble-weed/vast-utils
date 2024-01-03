@@ -25,6 +25,7 @@ bash install_kitty.sh
 bash setup_vim.sh
 bash setup_code_server.sh
 bash setup_gpnnenv.sh
+bash get_private_for_vast.sh
 #bash setup_conda.sh
 conda init
 bash setup_profile.sh
