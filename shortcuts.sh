@@ -294,12 +294,9 @@ source /root/instance_info.sh
 alias pythond='python -m ipdb -c c'
 bash $SCRIPT_DIR/start_services.sh
 echo "shortcuts.sh done"
+alias ..="cd ../"
 alias ...="cd ../../"
 alias ....="cd ../../../"
-alias cdgpnn="cd $GPNN"
-alias cdelp="cd $ELP"
-alias cdelp_utils="cd $ELP/torchray/attribution/elp_utils"
-alias vimhelp="vim /root/myhelp/help.md"
 
 function mycd()
 {
@@ -329,7 +326,10 @@ function mycd()
 #    unset WORKINGON
 #  fi
 }
-
+alias cdgpnn="set-title gpnn;cd $GPNN"
+alias cdelp="set-title elp;cd $ELP"
+alias cdelp_utils="cd $ELP/torchray/attribution/elp_utils"
+alias vimhelp="vim /root/myhelp/help.md"
 alias vimdutils="vim /root/evaluate-saliency-4/dutils/dutils/dutils.py"
 alias vimdutilsr="vim /root/evaluate-saliency-4/dutils/requirements.txt"
 alias cddutils="set-title dutils; cd /root/evaluate-saliency-4/dutils/dutils"
@@ -337,6 +337,6 @@ alias refreshshortcuts="source /root/vast-utils/shortcuts.sh;source /root/vast-u
 alias vimshortcuts="vim /root/vast-utils/shortcuts.sh;source /root/vast-utils/shortcuts.sh"
 alias vimtmpalias="vim /root/vast-utils/tmp_alias.sh"
 alias cdvutils='cd /root/vast-utils'
-alias vimtodo="cd /root/todo/ && vim /root/todo/todo && git a todo && git c 'todo' && git pu && cd -"
+alias vimtodo="set-title todo; cd /root/todo/ && vim /root/todo/todo && git a todo && git c 'todo' && git pu && cd -"
 source /root/vast-utils/tmp_alias.sh
 
