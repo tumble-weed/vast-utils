@@ -30,3 +30,4 @@ alias tryimagenet="python -m ipdb -c c examples/attribution_benchmark.py --metho
 alias tryunw="python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation_with_unweighted_scale_and_crop --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 alias trynormalized="python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation_with_simple_scale_and_crop_normalized --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 alias cdvscripts="cd /root/evaluate-saliency-4/elp_with_scales/vast-scripts"
+alias cdrscripts="cd /root/evaluate-saliency-4/elp_with_scales/run-scripts"
