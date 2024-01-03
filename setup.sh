@@ -17,6 +17,9 @@ else
 fi
 touch /root/.no_auto_tmux
 bash install.sh
+bash setup_gcc.sh
+bash install_unzip.sh
+bash install_gdown.sh
 bash install_gh.sh
 bash install_kitty.sh
 bash setup_vim.sh

@@ -16,7 +16,7 @@ INVERT=/root/evaluate-saliency-4/fong-invert/
 DI=$INVERT/DeepInversion
 MULTI=$INVERT/../dummy-multithresh
 #alias cdmulti="cd $MULTI"
-alias cdmulti="cd /root/evaluate-saliency-4/multithresh-saliency"
+alias cdmulti="set-title multi;cd /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency"
 STABLE=/root/evaluate-saliency-4/stable_diffusion
 function nsmi () {
 nvidia-smi
@@ -332,9 +332,11 @@ function mycd()
 
 alias vimdutils="vim /root/evaluate-saliency-4/dutils/dutils/dutils.py"
 alias vimdutilsr="vim /root/evaluate-saliency-4/dutils/requirements.txt"
-alias cddutils="set-title dutils; cd /root/evaluate-saliency-4/dutils"
+alias cddutils="set-title dutils; cd /root/evaluate-saliency-4/dutils/dutils"
 alias refreshshortcuts="source /root/vast-utils/shortcuts.sh;source /root/vast-utils/tmp_alias.sh"
 alias vimshortcuts="vim /root/vast-utils/shortcuts.sh;source /root/vast-utils/shortcuts.sh"
 alias vimtmpalias="vim /root/vast-utils/tmp_alias.sh"
 alias cdvutils='cd /root/vast-utils'
+alias vimtodo="cd /root/todo/ && vim /root/todo/todo && git a todo && git c 'todo' && git pu && cd -"
 source /root/vast-utils/tmp_alias.sh
+

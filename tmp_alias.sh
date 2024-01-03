@@ -19,4 +19,4 @@ alias trymulti="cd /root/evaluate-saliency-4/multithresh-saliency/multithresh_sa
 #alias cdelp="cd /root/evaluate-saliency-4/elp_with_scales"
 #alias cdmulti="cd /root/evaluate-saliency-4/multithresh-saliency"
 alias trydutils='python -c "import dutils"'
-alias vimtodo="vim /root/todo"
+alias cdcam="cd /root/evaluate-saliency-4/cam-benchmark/"
