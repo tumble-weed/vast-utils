@@ -171,7 +171,7 @@ function startcsm ()
 function startjup () 
 {
  cd /root
- tmux new -d -s t-jup jupyter notebook --port 8000 --allow-root --NotebookApp.password="$(echo password | python -c 'from notebook.auth import passwd;print(passwd(input()))')"
+ tmux new -d -s t-jup jupyter notebook --port 8000 --allow-root --NotebookApp.password="$(echo password | python -c 'from jupyter_server.auth import passwd;print(passwd(input()))')"
 
 }
 function startjup_ () 
@@ -330,13 +330,14 @@ alias cdgpnn="set-title gpnn;cd $GPNN"
 alias cdelp="set-title elp;cd $ELP"
 alias cdelp_utils="cd $ELP/torchray/attribution/elp_utils"
 alias vimhelp="vim /root/myhelp/help.md"
-alias vimdutils="vim /root/evaluate-saliency-4/dutils/dutils/dutils.py"
+alias vimdutils="cd /root/evaluate-saliency-4/dutils/dutils/; vim /root/evaluate-saliency-4/dutils/dutils/dutils.py; git add .;git cpp 'updated';cd -"
 alias vimdutilsr="vim /root/evaluate-saliency-4/dutils/requirements.txt"
 alias cddutils="set-title dutils; cd /root/evaluate-saliency-4/dutils/dutils"
 alias refreshshortcuts="source /root/vast-utils/shortcuts.sh;source /root/vast-utils/tmp_alias.sh"
 alias vimshortcuts="vim /root/vast-utils/shortcuts.sh;source /root/vast-utils/shortcuts.sh"
-alias vimtmpalias="vim /root/vast-utils/tmp_alias.sh"
+alias vimtmpalias="vim /root/vast-utils/tmp_alias.sh;source /root/vast-utils/tmp_alias.sh"
 alias cdvutils='cd /root/vast-utils'
 alias vimtodo="set-title todo; cd /root/todo/ && vim /root/todo/todo && git a todo && git c 'todo' && git pu && cd -"
+alias vimssh="vim /root/.ssh/config"
 source /root/vast-utils/tmp_alias.sh
 
