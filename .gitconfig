@@ -7,3 +7,4 @@
 	c = commit -m
 	s = status
 	d = diff HEAD 
+    cpp = "!f() { git commit -m \"$1\" && git push; }; f"
