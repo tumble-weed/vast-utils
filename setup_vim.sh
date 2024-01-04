@@ -1,6 +1,12 @@
+#!/bin/bash
+mypath=`realpath ${BASH_SOURCE[0]}`
+mydir=`dirname $mypath`
 apt update
 apt install vim -y
-echo "set nu" >> /root/.vimrc
-echo "set tabstop=4" >> /root/.vimrc
-echo "set shiftwidth=4" >> /root/.vimrc
-echo "set expandtab" >> /root/.vimrc
+cp $mydir/.vimrc /root/.vimrc
+#echo "set nu" >> /root/.vimrc
+#echo "set tabstop=4" >> /root/.vimrc
+#echo "set shiftwidth=4" >> /root/.vimrc
+#echo "set expandtab" >> /root/.vimrc
+#echo "set expandtab" >> /root/.vimrc
+
