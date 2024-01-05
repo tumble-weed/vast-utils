@@ -272,7 +272,7 @@ source $SCRIPT_DIR/tmp_alias.sh
 
 
 #cd $ELP
-cd $GPNN
+#cd $GPNN
 alias redobash="source /root/.bashrc"
 
 
