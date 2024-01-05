@@ -60,3 +60,4 @@ alias vimsetupvast="vim /root/evaluate-saliency-4/elp_with_scales/vast-scripts/s
 alias vimuploadvast="vim /root/evaluate-saliency-4/elp_with_scales/scripts/upload.py"
 alias vimsshauthorized="vim /root/.ssh/authorized_keys"
 alias vimssh="vim /root/.ssh/config"
+alias vimvcopy="vim /root/vast-utils/vast_copy.sh"
