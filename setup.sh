@@ -6,17 +6,28 @@ bash install_rsync.sh
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $DIR
 # Add the source line to .bashrc if it's not already present
-if ! grep -q "source $DIR/shortcuts.sh" ~/.bashrc; then
+#if ! grep -q "source $DIR/shortcuts.sh" ~/.bashrc; then
+#    # echo "VASTID=" >> ~/.bashrc
+#    echo "source $DIR/shortcuts.sh" >> ~/.bashrc
+#    echo "source /root/instance_info.sh" >> ~/.bashrc
+#    cp "$DIR/.gitconfig" ~/.gitconfig
+#    echo "Added source line to ~/.bashrc"
+#else
+#    echo "Source line already present in ~/.bashrc"
+#fi
+if ! grep -q "source $DIR/.bashrc" ~/.bashrc; then
     # echo "VASTID=" >> ~/.bashrc
-    echo "source $DIR/shortcuts.sh" >> ~/.bashrc
-    echo "source /root/instance_info.sh" >> ~/.bashrc
-    cp "$DIR/.gitconfig" ~/.gitconfig
-    echo "Added source line to ~/.bashrc"
+    echo "source $DIR/.bashrc" >> ~/.bashrc
+    #echo "source /root/instance_info.sh" >> ~/.bashrc
+    #cp "$DIR/.gitconfig" ~/.gitconfig
+    #echo "Added source line to ~/.bashrc"
 else
     echo "Source line already present in ~/.bashrc"
 fi
+
 touch /root/.no_auto_tmux
-bash install.sh
+#bash install.sh
+bash setup_git.sh
 bash setup_gcc.sh
 bash install_unzip.sh
 bash install_gdown.sh
