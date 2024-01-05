@@ -64,8 +64,13 @@ PYPDB="python -m ipdb"
 PYPDBC="${PYPDB} -c c"
 function FINDCODE() { 
     echo $1
+    find .  -type f -print0 | xargs -0 grep -n "$1"
+}
+function FINDPY() { 
+    echo $1
     find . -name "*.py" -type f -print0 | xargs -0 grep -n "$1"
 }
+
 function FINDTEX() { 
     echo $1
     find . -name "*.tex" -type f -print0 | xargs -0 grep -n "$1"
