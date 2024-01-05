@@ -66,3 +66,41 @@ alias vimssh="vim /root/.ssh/config"
 alias vimvastcopy="vim /root/vast-utils/vast_copy.sh"
 alias finddonefilelist="echo /root/evaluate-saliency-4/elp_with_scales/scripts/create_donefilelist.py"alias findgenrunscripts="echo /root/evaluate-saliency-4/elp_with_scales/scripts/generate_run_scripts.py"
 alias examplegenrunscripts="echo \"cdelp;python scripts/generate_run_scripts.py --start 0 --end 5000 --n_parts 4 --arch vgg16 --method extremal_perturbation_with_composition --dataset voc_2007 --continue\""
+alias findsetupvast="echo /root/evaluate-saliency-4/elp_with_scales/vast-scripts/setup_vast_instance.py"
+alias examplesetupvastinstance="echo \"python vast-scripts/setup_vast_113.py\""
+
+function check_upload() {
+    local instance_name="$1"
+    #echo "Instance Name: $instance_name"
+    tma t-upload-benchmark-$instance_name
+    tma t-upload-dutils-$instance_name
+    tma t-upload-elp-$instance_name
+    tma t-upload-gpnnenv-$instance_name
+    #tma t-upload-sess-$instance_name
+    #tma t-vast-$instance_name
+}
+function check_running() {
+    local instance_name="$1"
+    #echo "Instance Name: $instance_name"
+    code=`python -c "s=\"$instance_name\";print(s[len('vast-'):])"`
+    #echo $code
+    ssh -t "$instance_name" "tmux attach-session -t t-$code"
+    }
+function download_from_instance() {
+    local instance_name="$1"
+    bash /root/evaluate-saliency-4/elp_with_scales/scripts/download_results.sh $instance_name
+}
+function check_download() {
+    local instance_name="$1"
+    tma t-download-$instance_name
+    }
+function setup_instance(){
+    local instance_name="$1"
+    python /root/evaluate-saliency-4/elp_with_scales/vast-scripts/setup_vast_instance.py $instance_name
+}
+alias vimselect="vim /root/evaluate-saliency-4/elp_with_scales/examples/select_results.py"
+alias tryselect="cdelp;python examples/select_results.py"
+alias trydofilelist="python -m ipdb -c c examples/attribution_benchmark.py --method rise --arch resnet50 --dataset voc_2007 --save_detailed_results true --use_dofilelist /tmp/dummy_dolist.txt"
+
+alias vimtmprun="vim /tmp/run_on_single_image_a.py"
+alias vimbackend="vim /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark/backend_for_run_on_image.py"
