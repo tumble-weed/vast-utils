@@ -66,6 +66,10 @@ function FINDCODE() {
     echo $1
     find .  -type f -print0 | xargs -0 grep -n "$1"
 }
+function FINDF() { 
+    echo $1
+    find . -name "$1" -type f 
+}
 function FINDPY() { 
     echo $1
     find . -name "*.py" -type f -print0 | xargs -0 grep -n "$1"
@@ -334,7 +338,7 @@ function mycd()
 alias cdgpnn="set-title gpnn;cd $GPNN"
 alias cdelp="set-title elp;cd $ELP"
 alias cdelp_utils="cd $ELP/torchray/attribution/elp_utils"
-alias vimhelp="vim /root/myhelp/help.md"
+alias vimhelp="cd /root/myhelp;vim /root/myhelp/help.md;git a help.md;git cpp \"help\";cd -"
 alias vimdutils="cd /root/evaluate-saliency-4/dutils/dutils/; vim /root/evaluate-saliency-4/dutils/dutils/dutils.py; git add .;git cpp 'updated';cd -"
 alias vimdutilsr="vim /root/evaluate-saliency-4/dutils/requirements.txt"
 alias cddutils="set-title dutils; cd /root/evaluate-saliency-4/dutils/dutils"
@@ -343,6 +347,11 @@ alias vimshortcuts="vim /root/vast-utils/shortcuts.sh;source /root/vast-utils/sh
 alias vimtmpalias="vim /root/vast-utils/tmp_alias.sh;source /root/vast-utils/tmp_alias.sh"
 alias cdvutils='cd /root/vast-utils'
 alias vimtodo="set-title todo; cd /root/todo/ && vim /root/todo/todo && git a todo && git c 'todo' && git pu && cd -"
+alias vimtodo2="set-title todo2; cd /root/todo2/ && vim /root/todo2/todo2 && git a todo2 && git c 'todo2' && git pu && cd -"
 alias vimssh="vim /root/.ssh/config"
 source /root/vast-utils/tmp_alias.sh
-
+function cdparent(){
+    local fname="$1"
+    fname=`realpath $fname`
+    cd `dirname $fname`
+}

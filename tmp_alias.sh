@@ -3,10 +3,10 @@ alias s115="ssh vast-115"
 alias s117="ssh vast-117"
 alias s119="ssh vast-119"
 
-function cdresults (){
-    set-title results
-    cd /root/bigfiles/other/results-torchray
-}
+#function cdresults (){
+#    set-title results
+#    cd /root/bigfiles/other/results-torchray
+#}
 
 alias designkata="vim /root/mykata/design"
 # alias cdkata="cd /root/mykata"
@@ -22,7 +22,6 @@ alias trymulti="cd /root/evaluate-saliency-4/multithresh-saliency/multithresh_sa
 alias cdcam="cd /root/evaluate-saliency-4/cam-benchmark/cam_benchmark"
 alias tryelp="python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 #alias tryelprng="python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true --rng 1234"
-alias trycompile="python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true --use_compiled_model true"
 alias vimattribution="vim /root/evaluate-saliency-4/elp_with_scales/examples/attribution_benchmark.py"
 alias vimrhandler="vim /root/evaluate-saliency-4/elp_with_scales/torchray/results_data_handler.py"
 #alias trysaver="python -m ipdb -c c examples/attribution_benchmark.py --method dummy --continue_  --arch resnet50 --dataset voc_2007 --save_detailed_results true --start 1000 --end 2000"
@@ -45,7 +44,7 @@ alias cdexamples="cd /root/evaluate-saliency-4/elp_with_scales/examples"
 alias cdrunscripts="cd /root/evaluate-saliency-4/elp_with_scales/run-scripts"
 alias makedummycorr="python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true;python -m ipdb -c c examples/attribution_benchmark.py --method dummy --start 2000 --end 3000  --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 alias vimsanity="vim /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/sanity_check.py"
-alias vimrank="vim /root/evaluate-saliency-4/elp_with_scales/examples/rank_correlation.ipy"
+alias vimrank="vim /root/evaluate-saliency-4/elp_with_scales/examples/rank_correlation.py"
 alias vimpsampling="vim /root/evaluate-saliency-4/elp_with_scales/torchray/attribution/elp_utils/patch_sampling.py"
 alias vimcsampling="vim /root/evaluate-saliency-4/elp_with_scales/torchray/attribution/elp_utils/crop_sampling.py"
 alias vimoct17="vim /root/evaluate-saliency-4/elp_with_scales/torchray/attribution/extremal_perturbation_with_scale_and_crop_oct17.py"
@@ -65,42 +64,114 @@ alias vimsshauthorized="vim /root/.ssh/authorized_keys"
 alias vimssh="vim /root/.ssh/config"
 alias vimvastcopy="vim /root/vast-utils/vast_copy.sh"
 alias finddonefilelist="echo /root/evaluate-saliency-4/elp_with_scales/scripts/create_donefilelist.py"alias findgenrunscripts="echo /root/evaluate-saliency-4/elp_with_scales/scripts/generate_run_scripts.py"
-alias examplegenrunscripts="echo \"cdelp;python scripts/generate_run_scripts.py --start 0 --end 5000 --n_parts 4 --arch vgg16 --method extremal_perturbation_with_composition --dataset voc_2007 --continue\""
+#alias examplegenrunscripts="echo \"cdelp;python scripts/generate_run_scripts.py --start 0 --end 5000 --n_parts 4 --arch vgg16 --method extremal_perturbation_with_composition --dataset voc_2007 --continue\""
 alias findsetupvast="echo /root/evaluate-saliency-4/elp_with_scales/vast-scripts/setup_vast_instance.py"
 alias examplesetupvastinstance="echo \"python vast-scripts/setup_vast_113.py\""
 
-function check_upload() {
-    local instance_name="$1"
-    #echo "Instance Name: $instance_name"
-    tma t-upload-benchmark-$instance_name
-    tma t-upload-dutils-$instance_name
-    tma t-upload-elp-$instance_name
-    tma t-upload-gpnnenv-$instance_name
-    #tma t-upload-sess-$instance_name
-    #tma t-vast-$instance_name
-}
-function check_running() {
-    local instance_name="$1"
-    #echo "Instance Name: $instance_name"
-    code=`python -c "s=\"$instance_name\";print(s[len('vast-'):])"`
-    #echo $code
-    ssh -t "$instance_name" "tmux attach-session -t t-$code"
-    }
-function download_from_instance() {
-    local instance_name="$1"
-    bash /root/evaluate-saliency-4/elp_with_scales/scripts/download_results.sh $instance_name
-}
-function check_download() {
-    local instance_name="$1"
-    tma t-download-$instance_name
-    }
-function setup_instance(){
-    local instance_name="$1"
-    python /root/evaluate-saliency-4/elp_with_scales/vast-scripts/setup_vast_instance.py $instance_name
-}
+#function check_upload() {
+#    local instance_name="$1"
+#    #echo "Instance Name: $instance_name"
+#    tma t-upload-benchmark-$instance_name
+#    tma t-upload-dutils-$instance_name
+#    tma t-upload-elp-$instance_name
+#    tma t-upload-gpnnenv-$instance_name
+#    #tma t-upload-sess-$instance_name
+#    #tma t-vast-$instance_name
+#}
+#function check_running() {
+#    local instance_name="$1"
+#    #echo "Instance Name: $instance_name"
+#    code=`python -c "s=\"$instance_name\";print(s[len('vast-'):])"`
+#    #echo $code
+#    ssh -t "$instance_name" "tmux attach-session -t t-$code"
+#    }
+#function download_from_instance() {
+#    local instance_name="$1"
+#    bash /root/evaluate-saliency-4/elp_with_scales/scripts/download_results.sh $instance_name
+#}
+#function check_download() {
+#    local instance_name="$1"
+#    tma t-download-$instance_name
+#    }
+#function setup_instance(){
+#    local instance_name="$1"
+#    python /root/evaluate-saliency-4/elp_with_scales/vast-scripts/setup_vast_instance.py $instance_name
+#}
+#function check_ndone(){
+#    local method="$1"
+#    local arch="$2"
+#    #python /root/evaluate-saliency-4/elp_with_scales/vast-scripts/setup_vast_instance.py $instance_name
+#    ls -d /root/bigfiles/other/results-torchray/*$method*$arch/*/ | wc -l
+#    ls /root/bigfiles/other/results-torchray/*$method*$arch/*/*.xz | wc -l
+#}
 alias vimselect="vim /root/evaluate-saliency-4/elp_with_scales/examples/select_results.py"
 alias tryselect="cdelp;python examples/select_results.py"
 alias trydofilelist="python -m ipdb -c c examples/attribution_benchmark.py --method rise --arch resnet50 --dataset voc_2007 --save_detailed_results true --use_dofilelist /tmp/dummy_dolist.txt"
 
 alias vimtmprun="vim /tmp/run_on_single_image_a.py"
 alias vimbackend="vim /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark/backend_for_run_on_image.py"
+alias vimvastshortcuts="vim /root/evaluate-saliency-4/elp_with_scales/scripts/vast_shortcuts.sh;source /root/evaluate-saliency-4/elp_with_scales/scripts/vast_shortcuts.sh"
+source /root/evaluate-saliency-4/elp_with_scales/scripts/vast_shortcuts.sh
+function ssh2(){
+
+    ssh -i /root/.ssh/shared_with_shubham $@
+}
+alias trysess="python -m ipdb -c c examples/attribution_benchmark.py --method SESS --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
+alias trycompile="TORCHDYNAMO_REPRO_AFTER=dynamo TORCHDYNAMO_REPRO_LEVEL=4 python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation   --end 100 --arch resnet50 --dataset voc_2007  --use_compiled_model true"
+alias trybackend="python -m torchray.benchmark.backend_for_run_on_image"
+alias cdbenchmark="cd /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark"
+alias cdhelpers="cd /root/evaluate-saliency-4/elp_with_scales/torchray/helpers"
+alias vimresultshandler="vim /root/evaluate-saliency-4/elp_with_scales/torchray/results_data_handler.py"
+alias lsresults="ls /root/bigfiles/other/results-torchray/"
+
+function createdonefilelist(){
+    local methodname_for_save="$1"
+    local arch="$2"
+    echo $methodname_for_save
+    python /root/evaluate-saliency-4/elp_with_scales/scripts/create_donefilelist.py --methodname_for_save "$methodname_for_save" --arch "$arch"
+}
+function createalldonefilelist(){
+ createdonefilelist extremal_perturbation vgg16
+ createdonefilelist extremal_perturbation resnet50
+ createdonefilelist extremal_perturbation_with_simple_scale_and_crop_normalized vgg16
+ createdonefilelist extremal_perturbation_with_simple_scale_and_crop_normalized resnet50
+ #createdonefilelist extremal_perturbation_with_unweighted_scale_and_crop vgg16
+ #createdonefilelist extremal_perturbation_with_unweighted_scale_and_crop resnet50
+}
+function vimrun(){
+    local instance_name="$1"
+    local suffix=`python -c "instance_name=\"$instance_name\"; print(instance_name[len('vast-'):]);"`
+    vim  /root/evaluate-saliency-4/elp_with_scales/run-scripts/run_vast_$suffix.sh 
+}
+function correctpointing(){
+local method=$1
+local arch=$2
+cdelp
+python /root/evaluate-saliency-4/elp_with_scales/scripts/correct_pointing.py --method $method --dataset voc_2007 --arch $arch
+    }
+function correctallpointing(){
+    correctpointing grad_cam resnet50
+    correctpointing grad_cam vgg16
+
+
+    correctpointing rise resnet50
+    correctpointing rise vgg16
+
+    correctpointing gradient resnet50
+    correctpointing gradient vgg16
+
+    correctpointing guided_backprop resnet50
+    correctpointing guided_backprop vgg16
+
+    correctpointing grad_cam resnet50
+    correctpointing grad_cam vgg16
+}
+
+function genrunscript(){
+    local start_dir="`pwd`"
+    local json_filename="$1"
+    cdelp
+    cd run-scripts
+    python generate_run_script.py --json_filename $json_filename
+    cd $start_dir
+}
