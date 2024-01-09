@@ -39,7 +39,7 @@ alias cdnotebooks="cd /root/evaluate-saliency-4/elp_with_scales/notebooks"
 alias trydone="python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation --use_donefilelist true --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 #alias trymulti1="python -m ipdb -c c examples/attribution_benchmark.py --method multithresh_saliency  --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 alias trygp="python -m ipdb -c c examples/attribution_benchmark.py --method gp_saliency --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
-alias trysanity="python -m ipdb -c c /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/sanity_check.py"
+alias trysanityelpgp="python -m ipdb -c c /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/sanity_check.py --method extremal_perturbation_with_simple_scale_and_crop_with_gp"
 alias cdexamples="cd /root/evaluate-saliency-4/elp_with_scales/examples"
 alias cdrunscripts="cd /root/evaluate-saliency-4/elp_with_scales/run-scripts"
 alias makedummycorr="python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true;python -m ipdb -c c examples/attribution_benchmark.py --method dummy --start 2000 --end 3000  --arch resnet50 --dataset voc_2007 --save_detailed_results true"
@@ -63,7 +63,8 @@ alias vimuploadvast="vim /root/evaluate-saliency-4/elp_with_scales/scripts/uploa
 alias vimsshauthorized="vim /root/.ssh/authorized_keys"
 alias vimssh="vim /root/.ssh/config"
 alias vimvastcopy="vim /root/vast-utils/vast_copy.sh"
-alias finddonefilelist="echo /root/evaluate-saliency-4/elp_with_scales/scripts/create_donefilelist.py"alias findgenrunscripts="echo /root/evaluate-saliency-4/elp_with_scales/scripts/generate_run_scripts.py"
+alias finddonefilelist="echo /root/evaluate-saliency-4/elp_with_scales/scripts/create_donefilelist.py"
+alias findgenrunscripts="echo /root/evaluate-saliency-4/elp_with_scales/scripts/generate_run_scripts.py"
 #alias examplegenrunscripts="echo \"cdelp;python scripts/generate_run_scripts.py --start 0 --end 5000 --n_parts 4 --arch vgg16 --method extremal_perturbation_with_composition --dataset voc_2007 --continue\""
 alias findsetupvast="echo /root/evaluate-saliency-4/elp_with_scales/vast-scripts/setup_vast_instance.py"
 alias examplesetupvastinstance="echo \"python vast-scripts/setup_vast_113.py\""
@@ -116,9 +117,9 @@ function ssh2(){
 
     ssh -i /root/.ssh/shared_with_shubham $@
 }
-alias trysess="python -m ipdb -c c examples/attribution_benchmark.py --method SESS --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
+alias trysess="python examples/attribution_benchmark.py --method SESS --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 alias trycompile="TORCHDYNAMO_REPRO_AFTER=dynamo TORCHDYNAMO_REPRO_LEVEL=4 python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation   --end 100 --arch resnet50 --dataset voc_2007  --use_compiled_model true"
-alias trybackend="python -m torchray.benchmark.backend_for_run_on_image"
+alias trybackend="DBG_VISUALIZATION=1 python -m torchray.benchmark.backend_for_run_on_image"
 alias cdbenchmark="cd /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark"
 alias cdhelpers="cd /root/evaluate-saliency-4/elp_with_scales/torchray/helpers"
 alias vimresultshandler="vim /root/evaluate-saliency-4/elp_with_scales/torchray/results_data_handler.py"
@@ -172,6 +173,44 @@ function genrunscript(){
     local json_filename="$1"
     cdelp
     cd run-scripts
-    python generate_run_script.py --json_filename $json_filename
+    python generate_run_script.py --json_filename run-jsons/$json_filename
     cd $start_dir
+}
+
+function upload_torchray(){
+rclone copy -P  /root/bigfiles/other/results-torchray aniketsinghresearch-gdrive:results-torchray
+rclone copy -P  /root/bigfiles/other/metrics-torchray aniketsinghresearch-gdrive:metrics-torchray
+    }
+alias vimworkflow="vim /root/evaluate-saliency-4/elp_with_scales/scripts/workflow.py"
+alias vim112="vim /root/evaluate-saliency-4/elp_with_scales/run-scripts/run_vast_112.sh"
+alias run112="cdelp;bash run-scripts/run_vast_112.sh"
+alias cdtorchray0="cd /root/evaluate-saliency-4/TorchRay"
+alias trygradcam0="cdtorchray0;python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation --arch resnet50 --dataset voc_2007"
+alias cdsess="cd /root/evaluate-saliency-4/sess"
+alias cdcameras="cd /root/evaluate-saliency-4/CAMERAS"
+#alias trysanity="DBG_SANITY=1 pythond /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/sanity_check.py"
+alias trysanity="DBG_SANITY=1 pythond /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/sanity_check.py --imroot /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/ILSVRC2012_val_00015410.JPEG --dataset imagenet --target 13"
+alias vimimagenetsynsets="vim /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/imagenet_synsets.py"
+function checkallresultstorchray(){
+    fname="/tmp/doneresults.txt"
+    echo "" > $fname
+    dataset=${1:-""}
+    method=${2:-""}
+    arch=${3:-""}
+    for d in `ls -d /root/bigfiles/other/results-torchray/$dataset*$method*$arch/`; do
+        echo $d >> $fname
+        echo "`ls -d $d/*/ | wc -l`" >> $fname
+        echo "`ls $d/*/*.xz | wc -l`" >> $fname
+        echo '-----------------------------------------------------' >> $fname
+    done
+
+    less $fname
+}
+alias trycameras="python examples/attribution_benchmark.py --method CAMERAS --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
+function checkgit(){
+    dirs=(/root/evaluate-saliency-4/elp_with_scales /root/evaluate-saliency-4/cam_benchmark /root/vast-utils/ /root/dutils)
+    for d in ${dirs[@]}; do
+        tmux new-session -d -s t-git "cd $d; git s;bash"
+        tma t-git
+    done
 }

@@ -355,3 +355,5 @@ function cdparent(){
     fname=`realpath $fname`
     cd `dirname $fname`
 }
+alias killlast="kill %%"
+alias f='realpath'
