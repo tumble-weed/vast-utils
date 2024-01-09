@@ -208,7 +208,7 @@ function checkallresultstorchray(){
 }
 alias trycameras="python examples/attribution_benchmark.py --method CAMERAS --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 function checkgit(){
-    dirs=(/root/evaluate-saliency-4/elp_with_scales /root/evaluate-saliency-4/cam_benchmark /root/vast-utils/ /root/dutils)
+    dirs=(/root/evaluate-saliency-4/elp_with_scales /root/evaluate-saliency-4/cam_benchmark /root/vast-utils/ /root/dutils /root/evaluate-saliency-4/CAMERAS /root/evaluate-saliency-4/sess)
     for d in ${dirs[@]}; do
         tmux new-session -d -s t-git "cd $d; git s;bash"
         tma t-git
