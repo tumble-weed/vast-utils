@@ -33,6 +33,7 @@ alias tryunwrng="python -m ipdb -c c examples/attribution_benchmark.py --method 
 alias trynormalized="python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation_with_simple_scale_and_crop_normalized --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 alias cdvastscripts="cd /root/evaluate-saliency-4/elp_with_scales/vast-scripts"
 alias cdrunscripts="cd /root/evaluate-saliency-4/elp_with_scales/run-scripts"
+alias cdrunjson="cd /root/evaluate-saliency-4/elp_with_scales/run-scripts/run-jsons"
 alias cdattribution="cd /root/evaluate-saliency-4/elp_with_scales/torchray/attribution"
 alias cdnotebooks="cd /root/evaluate-saliency-4/elp_with_scales/notebooks"
 
@@ -119,7 +120,6 @@ function ssh2(){
 }
 alias trysess="python examples/attribution_benchmark.py --method SESS --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 alias trycompile="TORCHDYNAMO_REPRO_AFTER=dynamo TORCHDYNAMO_REPRO_LEVEL=4 python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation   --end 100 --arch resnet50 --dataset voc_2007  --use_compiled_model true"
-alias trybackend="DBG_VISUALIZATION=1 python -m torchray.benchmark.backend_for_run_on_image"
 alias cdbenchmark="cd /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark"
 alias cdhelpers="cd /root/evaluate-saliency-4/elp_with_scales/torchray/helpers"
 alias vimresultshandler="vim /root/evaluate-saliency-4/elp_with_scales/torchray/results_data_handler.py"
@@ -213,4 +213,35 @@ function checkgit(){
         tmux new-session -d -s t-git "cd $d; git s;bash"
         tma t-git
     done
+}
+
+alias trybackend="DBG_VISUALIZATION=1 python -m torchray.benchmark.backend_for_run_on_image"
+alias tryvisualize=trybackend
+function tryvisualizesimple(){
+    imroot="000013" #imroot="000116"
+    class_id="9" #class_id="8"
+    dataset="voc_2007"
+    method="extremal_perturbation_with_simple_scale_and_crop_normalized"
+    arch="vgg16"
+
+    python -m torchray.benchmark.backend_for_run_on_image --imroot $imroot --class_id $class_id --dataset $dataset --method $method --arch $arch
+}
+PASCALDIR="/root/bigfiles/dataset/voc/VOCdevkit/VOC2007/JPEGImages"
+function vimallrun(){
+    curdir=`pwd`
+    cdrunscripts
+    runscripts_=$(ls run*.sh)
+
+    # Initialize an empty array
+    runscripts=()
+
+    # Use a while loop to read each line of the ls output into the array
+    while IFS= read -r file; do
+        runscripts+=("`realpath $file`")
+    done <<< "$runscripts_"
+
+    for runscript in ${runscripts[@]};do
+        vim $runscript
+        done 
+    cd $curdir
 }
