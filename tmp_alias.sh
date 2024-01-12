@@ -46,6 +46,7 @@ alias cdrunscripts="cd /root/evaluate-saliency-4/elp_with_scales/run-scripts"
 alias makedummycorr="python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true;python -m ipdb -c c examples/attribution_benchmark.py --method dummy --start 2000 --end 3000  --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 alias vimsanity="vim /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/sanity_check.py"
 alias vimrank="vim /root/evaluate-saliency-4/elp_with_scales/examples/rank_correlation.py"
+
 alias vimpsampling="vim /root/evaluate-saliency-4/elp_with_scales/torchray/attribution/elp_utils/patch_sampling.py"
 alias vimcsampling="vim /root/evaluate-saliency-4/elp_with_scales/torchray/attribution/elp_utils/crop_sampling.py"
 alias vimoct17="vim /root/evaluate-saliency-4/elp_with_scales/torchray/attribution/extremal_perturbation_with_scale_and_crop_oct17.py"
@@ -168,6 +169,24 @@ function correctallpointing(){
     correctpointing grad_cam vgg16
 }
 
+
+__runjson_completion() {
+        local cur prev
+        COMPREPLY=()
+        cur="${COMP_WORDS[COMP_CWORD]}"
+        prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+        # Get a list of files in the config_files/ folder
+        files=$(find /root/evaluate-saliency-4/elp_with_scales/run-scripts/run-jsons/ -type f -printf "%f\n")
+
+
+        # Use compgen to generate autocompletion suggestions
+        COMPREPLY=( $(compgen -W "$files" -- "$cur") )
+        return 0
+}
+
+
+
 function genrunscript(){
     local start_dir="`pwd`"
     local json_filename="$1"
@@ -176,6 +195,40 @@ function genrunscript(){
     python generate_run_script.py --json_filename run-jsons/$json_filename
     cd $start_dir
 }
+
+complete -F __runjson_completion genrunscript
+function vimrunjson(){
+    local fname="$1"
+    cd /root/evaluate-saliency-4/elp_with_scales/run-scripts/run-jsons/
+    vim $fname
+    cd - 
+}
+complete -F __runjson_completion vimrunjson
+
+__runscript_completion() {
+        local cur prev
+        COMPREPLY=()
+        cur="${COMP_WORDS[COMP_CWORD]}"
+        prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+        # Get a list of files in the config_files/ folder
+        files=$(find /root/evaluate-saliency-4/elp_with_scales/run-scripts/ -maxdepth 1 -name "*.sh" -type f -printf "%f\n")
+
+
+        # Use compgen to generate autocompletion suggestions
+        COMPREPLY=( $(compgen -W "$files" -- "$cur") )
+        return 0
+}
+
+
+function vimrunscript(){
+    local fname="$1"
+    cd /root/evaluate-saliency-4/elp_with_scales/run-scripts
+    vim /root/evaluate-saliency-4/elp_with_scales/run-scripts/$fname
+    cd -
+}
+complete -F __runscript_completion vimrunscript
+
 
 function upload_torchray(){
 rclone copy -P  /root/bigfiles/other/results-torchray aniketsinghresearch-gdrive:results-torchray
@@ -208,7 +261,7 @@ function checkallresultstorchray(){
 }
 alias trycameras="python examples/attribution_benchmark.py --method CAMERAS --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 function checkgit(){
-    dirs=(/root/evaluate-saliency-4/elp_with_scales /root/evaluate-saliency-4/cam_benchmark /root/vast-utils/ /root/dutils /root/evaluate-saliency-4/CAMERAS /root/evaluate-saliency-4/sess)
+    dirs=(/root/evaluate-saliency-4/elp_with_scales /root/evaluate-saliency-4/cam-benchmark /root/vast-utils/ /root/evaluate-saliency-4/dutils /root/evaluate-saliency-4/CAMERAS /root/evaluate-saliency-4/sess)
     for d in ${dirs[@]}; do
         tmux new-session -d -s t-git "cd $d; git s;bash"
         tma t-git
@@ -245,3 +298,19 @@ function vimallrun(){
         done 
     cd $curdir
 }
+
+function runranksimplenormalized(){
+    curdir=`pwd`
+    cdelp
+    python examples/rank_correlation.py --arch resnet50 --dataset voc_2007 --methods extremal_perturbation_with_simple_scale_and_crop_normalized_rng1 extremal_perturbation_with_simple_scale_and_crop_normalized_rng2 extremal_perturbation_with_simple_scale_and_crop_normalized_rng3  --desc  extremal_perturbation_with_simple_scale_and_crop_normalized 
+    cd $curdir
+}
+
+function runrankelpgp(){
+    curdir=`pwd`
+    cdelp
+    python examples/rank_correlation.py --arch resnet50 --dataset voc_2007 --methods extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng1 extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng2 extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng3  --desc  extremal_perturbation_with_simple_scale_and_crop_with_gp_log_prob
+    cd $curdir
+}
+alias vimcollect="cdelp;vim scripts/collect_results.py"
+alias runcollect="cdelp;python scripts/collect_results.py"

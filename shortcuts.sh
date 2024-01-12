@@ -347,7 +347,19 @@ alias vimshortcuts="vim /root/vast-utils/shortcuts.sh;source /root/vast-utils/sh
 alias vimtmpalias="vim /root/vast-utils/tmp_alias.sh;source /root/vast-utils/tmp_alias.sh"
 alias cdvutils='cd /root/vast-utils'
 alias vimtodo="set-title todo; cd /root/todo/ && vim /root/todo/todo && git a todo && git c 'todo' && git pu && cd -"
-alias vimtodo2="set-title todo2; cd /root/todo2/ && vim /root/todo2/todo2 && git a todo2 && git c 'todo2' && git pu && cd -"
+#alias vimtodo2="set-title todo2; cd /root/todo2/ && vim /root/todo2/todo2 && git a . && git c 'todo2' && git pu && cd -"
+function vimtodo2(){
+    set-title todo2; 
+    cd /root/todo2/
+    fname="$1"
+    echo $fname
+    if [ -z "$fname" ];then
+       vim /root/todo2/todo2 
+    else
+       vim /root/todo2/$fname
+    fi
+    git a . && git c 'todo2' && git pu && cd -
+    }
 alias vimssh="vim /root/.ssh/config"
 source /root/vast-utils/tmp_alias.sh
 function cdparent(){
