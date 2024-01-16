@@ -1,4 +1,5 @@
-alias runsess="cd $ELP; CUDA_VISIBLE_DEVICES=, python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation_with_sess_scale_and_crop --start 0 --end 5000 --continue_ --arch vgg16 --dataset voc_2007"
+#alias runsess="cd $ELP; DBG_SESS=1 CUDA_VISIBLE_DEVICES=, python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation_with_sess_scale_and_crop --start 0 --end 5000 --continue_ --arch vgg16 --dataset voc_2007"
+alias dbgsess="cd $ELP; DBG_SESS=1 CUDA_VISIBLE_DEVICES=, python -m ipdb -c c examples/attribution_benchmark.py --method SESS --start 0 --end 5000  --arch vgg16 --dataset voc_2007"
 alias s115="ssh vast-115"
 alias s117="ssh vast-117"
 alias s119="ssh vast-119"
@@ -20,7 +21,7 @@ alias trymulti="cd /root/evaluate-saliency-4/multithresh-saliency/multithresh_sa
 #alias cdmulti="cd /root/evaluate-saliency-4/multithresh-saliency"
 #alias trydutils='python -c "import dutils"'
 alias cdcam="cd /root/evaluate-saliency-4/cam-benchmark/cam_benchmark"
-alias tryelp="python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
+alias tryelp="python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation --start 2000 --end 3000 --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 #alias tryelprng="python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true --rng 1234"
 alias vimattribution="vim /root/evaluate-saliency-4/elp_with_scales/examples/attribution_benchmark.py"
 alias vimrhandler="vim /root/evaluate-saliency-4/elp_with_scales/torchray/results_data_handler.py"
@@ -40,7 +41,7 @@ alias cdnotebooks="cd /root/evaluate-saliency-4/elp_with_scales/notebooks"
 alias trydone="python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation --use_donefilelist true --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 #alias trymulti1="python -m ipdb -c c examples/attribution_benchmark.py --method multithresh_saliency  --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 alias trygp="python -m ipdb -c c examples/attribution_benchmark.py --method gp_saliency --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
-alias trysanityelpgp="python -m ipdb -c c /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/sanity_check.py --method extremal_perturbation_with_simple_scale_and_crop_with_gp"
+alias trysanityelpgp="cdcam;python -m ipdb -c c /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/sanity_check.py --method extremal_perturbation_with_simple_scale_and_crop_with_gp  --imroot /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/ILSVRC2012_val_00015410.JPEG --dataset imagenet --target 13"
 alias cdexamples="cd /root/evaluate-saliency-4/elp_with_scales/examples"
 alias cdrunscripts="cd /root/evaluate-saliency-4/elp_with_scales/run-scripts"
 alias makedummycorr="python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true;python -m ipdb -c c examples/attribution_benchmark.py --method dummy --start 2000 --end 3000  --arch resnet50 --dataset voc_2007 --save_detailed_results true"
@@ -108,9 +109,24 @@ alias examplesetupvastinstance="echo \"python vast-scripts/setup_vast_113.py\""
 #    ls /root/bigfiles/other/results-torchray/*$method*$arch/*/*.xz | wc -l
 #}
 alias vimselect="vim /root/evaluate-saliency-4/elp_with_scales/examples/select_results.py"
-alias tryselect="cdelp;python examples/select_results.py"
+alias tryselect="cdelp;pythond examples/select_results.py"
 alias trydofilelist="python -m ipdb -c c examples/attribution_benchmark.py --method rise --arch resnet50 --dataset voc_2007 --save_detailed_results true --use_dofilelist /tmp/dummy_dolist.txt"
+function runonimroot(){
 
+    "runonimroot rise resnet50  /tmp/dummy_dolist.txt"
+    local method="$1"
+    local arch="$2"
+    local dofilelist="$3"
+    local dataset="${4:-voc_2007}"
+    python -m ipdb -c c examples/attribution_benchmark.py --method $method --arch $arch --dataset $dataset --save_detailed_results true --use_dofilelist $dofilelist
+
+}
+function dummyfunction(){
+    local arg1="$1"
+    local arg2="$2"
+    echo "$arg1"
+    echo "$arg2"
+    }
 alias vimtmprun="vim /tmp/run_on_single_image_a.py"
 alias vimbackend="vim /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark/backend_for_run_on_image.py"
 alias vimvastshortcuts="vim /root/evaluate-saliency-4/elp_with_scales/scripts/vast_shortcuts.sh;source /root/evaluate-saliency-4/elp_with_scales/scripts/vast_shortcuts.sh"
@@ -230,9 +246,21 @@ function vimrunscript(){
 complete -F __runscript_completion vimrunscript
 
 
-function upload_torchray(){
-rclone copy -P  /root/bigfiles/other/results-torchray aniketsinghresearch-gdrive:results-torchray
-rclone copy -P  /root/bigfiles/other/metrics-torchray aniketsinghresearch-gdrive:metrics-torchray
+function upload_bigfiles_other_(){
+    while true;do
+        rclone copy -P  /root/bigfiles/other/results-torchray aniketsinghresearch-gdrive:results-torchray
+        rclone copy -P  /root/bigfiles/other/metrics-torchray aniketsinghresearch-gdrive:metrics-torchray
+        sleep 10
+    done
+
+    }
+
+function upload_bigfiles_other(){
+    tmux kill-session t-rclone-bigfiles
+    #tmux new-session -d -s t-rclone-bigfiles 'watch -n 10 bash -i -c "upload_bigfiles_other_"'
+
+    tmux new-session -d -s t-rclone-bigfiles "bash -i -c \"upload_bigfiles_other_\""
+    tmux a -t t-rclone-bigfiles
     }
 alias vimworkflow="vim /root/evaluate-saliency-4/elp_with_scales/scripts/workflow.py"
 alias vim112="vim /root/evaluate-saliency-4/elp_with_scales/run-scripts/run_vast_112.sh"
@@ -242,14 +270,14 @@ alias trygradcam0="cdtorchray0;python -m ipdb -c c examples/attribution_benchmar
 alias cdsess="cd /root/evaluate-saliency-4/sess"
 alias cdcameras="cd /root/evaluate-saliency-4/CAMERAS"
 #alias trysanity="DBG_SANITY=1 pythond /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/sanity_check.py"
-alias trysanity="DBG_SANITY=1 pythond /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/sanity_check.py --imroot /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/ILSVRC2012_val_00015410.JPEG --dataset imagenet --target 13"
+alias trysanity="cdcam;DBG_SANITY=1 pythond /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/sanity_check.py --imroot /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/ILSVRC2012_val_00015410.JPEG --dataset imagenet --target 13"
 alias vimimagenetsynsets="vim /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/imagenet_synsets.py"
 function checkallresultstorchray(){
-    fname="/tmp/doneresults.txt"
+    local fname="/tmp/doneresults.txt"
     echo "" > $fname
-    dataset=${1:-""}
-    method=${2:-""}
-    arch=${3:-""}
+    local dataset=${1:-""}
+    local method=${2:-""}
+    local arch=${3:-""}
     for d in `ls -d /root/bigfiles/other/results-torchray/$dataset*$method*$arch/`; do
         echo $d >> $fname
         echo "`ls -d $d/*/ | wc -l`" >> $fname
@@ -261,32 +289,226 @@ function checkallresultstorchray(){
 }
 alias trycameras="python examples/attribution_benchmark.py --method CAMERAS --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 function checkgit(){
-    dirs=(/root/evaluate-saliency-4/elp_with_scales /root/evaluate-saliency-4/cam-benchmark /root/vast-utils/ /root/evaluate-saliency-4/dutils /root/evaluate-saliency-4/CAMERAS /root/evaluate-saliency-4/sess)
-    for d in ${dirs[@]}; do
+    #set -e
+    dirs=("/root/evaluate-saliency-4/elp_with_scales" "/root/evaluate-saliency-4/cam-benchmark" "/root/vast-utils/" "/root/evaluate-saliency-4/dutils" "/root/evaluate-saliency-4/CAMERAS" "/root/evaluate-saliency-4/sess")
+    for d in "${dirs[@]}"; do
         tmux new-session -d -s t-git "cd $d; git s;bash"
         tma t-git
     done
+    #set +e
 }
-
+######################################
+#print_in_reverse(){
+#    arg1=$1
+#    arg2=$2
+#    echo "$arg2 $arg1"
+#    }
+######################################
 alias trybackend="DBG_VISUALIZATION=1 python -m torchray.benchmark.backend_for_run_on_image"
 alias tryvisualize=trybackend
 function tryvisualizesimple(){
-    imroot="000013" #imroot="000116"
-    class_id="9" #class_id="8"
-    dataset="voc_2007"
-    method="extremal_perturbation_with_simple_scale_and_crop_normalized"
-    arch="vgg16"
+    local imroot="000013" #imroot="000116"
+    local class_id="9" #class_id="8"
+    local dataset="voc_2007"
+    local method="extremal_perturbation_with_simple_scale_and_crop_normalized"
+    local arch="vgg16"
 
     python -m torchray.benchmark.backend_for_run_on_image --imroot $imroot --class_id $class_id --dataset $dataset --method $method --arch $arch
 }
+
+
+function runranksimplenormalized(){
+    local curdir=`pwd`
+    cdelp
+    python examples/rank_correlation.py --arch resnet50 --dataset voc_2007 --methods extremal_perturbation_with_simple_scale_and_crop_normalized_rng1 extremal_perturbation_with_simple_scale_and_crop_normalized_rng2 extremal_perturbation_with_simple_scale_and_crop_normalized_rng3  --desc  extremal_perturbation_with_simple_scale_and_crop_normalized 
+    cd $curdir
+}
+
+function runrankelpgp(){
+    local curdir=`pwd`
+    cdelp
+    python examples/rank_correlation.py --arch resnet50 --dataset voc_2007 --methods extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng1 extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng2 extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng3  --desc  extremal_perturbation_with_simple_scale_and_crop_with_gp_log_prob
+    cd $curdir
+}
+alias vimcollect="cdelp;vim scripts/collect_results.py"
+alias runcollect="cdelp;python scripts/collect_results.py"
+alias runcollectimages="cdelp;python scripts/collect_images.py"
+alias vimpointing="cdelp;vim /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark/pointing_game.py; cd-"
+alias vimdeletiont="cdelp;vim /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark/deletion_game.py; cd-"
+alias trygradcam="cdelp;python examples/attribution_benchmark.py --method grad_cam --arch resnet50 --dataset voc_2007"
+alias trydeletiont="cdelp;pythond examples/attribution_benchmark.py --method grad_cam --arch resnet50 --dataset voc_2007 --metrics deletion_game"
+alias trypointingt="cdelp;pythond examples/attribution_benchmark.py --method grad_cam --arch resnet50 --dataset voc_2007"
+
+ELPGP="extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1"
+ELP_SIMPLE="extremal_perturbation_with_simple_scale_and_crop_normalized"
+UNW="extremal_perturbation_with_unweighted_scale_and_crop-"
+function check_remaining_jan13(){
+    #check_ndone "CAMERAS" resnet50
+    #read -p "(Continue)" _dummy
+    #check_ndone "CAMERAS" vgg16
+    #read -p "(Continue)" _dummy
+    #check_ndone "SESS" resnet50
+    #read -p "(Continue)" _dummy
+    #check_ndone "SESS" vgg16
+    #read -p "(Continue)" _dummy
+    check_ndone "${ELPGP}-" resnet50
+    read -p "(Continue)" _dummy
+   check_ndone "${ELPGP}_rng2-" resnet50
+    read -p "(Continue)" _dummy
+    check_ndone "${ELPGP}_rng3-" resnet50
+    read -p "(Continue)" _dummy
+    #check_ndone $UNW vgg16
+    #read -p "(Continue)" _dummy
+    #check_ndone $UNW resnet50
+    #read -p "(Continue)" _dummy
+    check_ndone "${ELPGP}-" vgg16
+    read -p "(Continue)" _dummy
+    check_ndone "${ELPGP}_rng2-" vgg16
+    read -p "(Continue)" _dummy
+    check_ndone "${ELPGP}_rng3-" vgg16
+    read -p "(Continue)" _dummy
+}
+alias vimanalyzeresults="vim /root/evaluate-saliency-4/elp_with_scales/torchray/analyze_results.py"
+runattributiondolist(){
+    local method="$1"
+    local arch="$2"
+    local dofilelist="$3"
+    local startdir=`pwd`
+    cdelp
+    python examples/attribution_benchmark.py --method $method --arch $arch --dataset voc_2007 --use_dofilelist $dofilelist
+    cd $startdir
+    }
+alias rungradcamdolist="runattributiondolist  grad_cam  resnet50  /root/bigfiles/other/metrics-torchray/failures_for_anchor_grad_cam_arch_resnet50_imroots"
+runpapermethodsdolist(){
+    local arch=$1
+    local dofile=$2
+    runattributiondolist  grad_cam  $arch  $dofile
+    runattributiondolist  gradient  $arch  $dofile 
+    runattributiondolist  guided_backprop $arch $dofile 
+    runattributiondolist  rise  $arch  $dofile
+}
+alias trypapermethodslist="runpapermethodsdolist resnet50 /root/bigfiles/other/metrics-torchray/failures_for_anchor_grad_cam_arch_resnet50_imroots"
+
+
+checkupload(){
+    local instance_id="$1"
+    local sessions=`tmux list-sessions | cut -d: -f1`
+    for s in ${sessions[@]};do
+        #echo $s
+        s=`python -c "if 'upload' in \"$s\":print(\"$s\")"`
+        s=`python -c "if '$instance_id' in \"$s\":print(\"$s\")"`
+        if [[ -z "$s" ]]; then
+            :
+        else
+            tma $s
+            fi
+        done
+
+    }
+alias cdtodo="cd /root/todo"
+alias cdtodo2="cd /root/todo2"
+alias exampleselectfile="echo \"/root/bigfiles/other/metrics-torchray/failures_for_anchor_grad_cam_arch_resnet50_imroots\""
+alias checkoldmodelsworking="cdelp;python examples/attribution_benchmark.py --method grad_cam --arch resnet50 --dataset voc_2007 --save_results false"
+sshtma ()
+{
+    local instance_id="$1"
+    ssh -t vast-$instance_id "tmux a -t t-$instance_id"
+}
+sshelp ()
+{
+
+    local instance_id="$1"
+    ssh -t vast-$instance_id "cd $ELP;bash"
+    }
+alias cdcifar="cd /root/evaluate-saliency-4/cifar10-fast-simple"
+#===========================================================================================
+function selectwhereelpgpbest(){
+    local curdir=`pwd`
+    cdelp
+    local arch=$1
+    local dataset="voc_2007"
+    local methodnames=("$ELPGP" "extremal_perturbation" "$ELP_SIMPLE" "rise" "grad_cam" "gradient" "guided_backprop" "excitation_backprop")
+    local anchor_method="$ELPGP"
+    local anchor_state=1
+    python examples/select_results.py --modelname $arch --dataset $dataset --methodnames ${methodnames[@]} --anchor_method $anchor_method --anchor_state $anchor_state --saveroot where_elp_gp_beter
+    cd $curdir
+}
+function selectwhereelpgpbad(){
+    local curdir=`pwd`
+    cdelp
+    local arch=$1
+    local dataset="voc_2007"
+    local methodnames=("$ELPGP" "extremal_perturbation")
+    local anchor_method="$ELPGP"
+    local anchor_state="-1"
+    python examples/select_results.py --modelname $arch --dataset $dataset --methodnames ${methodnames[@]} --anchor_method $anchor_method --anchor_state $anchor_state --saveroot failures_for_elp_gp
+    cd $curdir
+}
+function selectwhereelpgpgoodelpcropbad(){
+    local curdir=`pwd`
+    cdelp
+    local arch=$1
+    local dataset="voc_2007"
+    local methodnames=("$ELPGP" "$ELP_SIMPLE")
+    local anchor_method="$ELPGP"
+    local anchor_state=1
+    python examples/select_results.py --modelname $arch --dataset $dataset --methodnames ${methodnames[@]} --anchor_method $anchor_method --anchor_state $anchor_state --saveroot where_elp_gp_beter_elp_crop
+    cd $curdir
+}
+function selectimagesforpaper(){
+    selectwhereelpgpbad vgg16
+    selectwhereelpgpbest vgg16
+    selectwhereelpgpgoodelpcropbad vgg16
+    selectwhereelpgpbad resnet50
+    selectwhereelpgpbest resnet50
+    selectwhereelpgpgoodelpcropbad resnet50
+}
+#===========================================================================================
+alias trycifar="cdelp;python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --arch resnet8 --dataset cifar-10 --metrics deletion_game"
+#function visualizeforpaper(){
+#    set -x
+#    local imroot="000013" #imroot="000116"
+#    local class_id="9" #class_id="8"
+#    local dataset="voc_2007"
+#    local simplemethod="extremal_perturbation_with_simple_scale_and_crop_normalized"
+#    local elpgpmethod="extremal_perturbation_with_simple_scale_and_crop_with_gp"
+#    local arch="resnet50"
+#    local failurefile="/root/bigfiles/other/metrics-torchray/failures_for_anchor_grad_cam_arch_resnet50_imroots_and_class_ids"
+#    local bestfile="/root/bigfiles/other/metrics-torchray/cherry_picked_for_anchor_grad_cam_arch_resnet50_imroots_and_class_ids"
+#    #local n_failures=4
+#    #local n_success=4
+#    fnames=("$failurefile" "$bestfile")
+#    for fname in "${fnames[@]}";do
+#        local i=0
+#        #python -c "with open('$failurefile','r') as f:pickle.readlines(f)"
+#        mapfile -t imroot_and_class_id < "$fname"
+#        #echo ${imroot_and_class_id[@]}
+#        #echo ${imroot_and_class_id[0]}
+#        for imroot_and_class_idi in "${imroot_and_class_id[@]}";do
+#            echo "$imroot_and_class_idi"
+#            read -r imroot class_id <<< "${imroot_and_class_idi[@]}"
+#            echo $i
+#            echo $imroot
+#            echo $class_id
+#            #read -p "(Continue)" _dummy
+#            python -m torchray.benchmark.backend_for_run_on_image --imroot $imroot --class_id $class_id --dataset $dataset --method $elpgpmethod --arch $arch && \
+#            python -m torchray.benchmark.backend_for_run_on_image --imroot $imroot --class_id $class_id --dataset $dataset --method $simplemethod --arch $arch
+#            ((++i))
+#            if [ "$i" -ge 4 ]; then
+#                break
+#            fi;
+#        done
+#    done
+#    set +x
+#}
 PASCALDIR="/root/bigfiles/dataset/voc/VOCdevkit/VOC2007/JPEGImages"
 function vimallrun(){
-    curdir=`pwd`
+    local curdir=`pwd`
     cdrunscripts
-    runscripts_=$(ls run*.sh)
+    local runscripts_=$(ls run*.sh)
 
     # Initialize an empty array
-    runscripts=()
+    local runscripts=()
 
     # Use a while loop to read each line of the ls output into the array
     while IFS= read -r file; do
@@ -298,19 +520,106 @@ function vimallrun(){
         done 
     cd $curdir
 }
-
-function runranksimplenormalized(){
+function collectimagesforpaper(){
+    set -x
     curdir=`pwd`
     cdelp
-    python examples/rank_correlation.py --arch resnet50 --dataset voc_2007 --methods extremal_perturbation_with_simple_scale_and_crop_normalized_rng1 extremal_perturbation_with_simple_scale_and_crop_normalized_rng2 extremal_perturbation_with_simple_scale_and_crop_normalized_rng3  --desc  extremal_perturbation_with_simple_scale_and_crop_normalized 
+    local dataset="voc_2007"
+    local archs=("resnet50" "vgg16")
+    # local n_visualize=4
+    for arch in ${archs[@]};do
+        local bestfile="/root/bigfiles/other/metrics-torchray/where_elp_gp_beter_anchor_extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_arch_${arch}_imroots_and_class_ids"
+        fnames=("$bestfile")
+        # cdelp
+        
+
+        for fname in "${fnames[@]}";do
+            local i=0
+            mapfile -t imroot_and_class_id < "$fname"
+            for imroot_and_class_idi in "${imroot_and_class_id[@]}";do
+                echo "$imroot_and_class_idi"
+                read -r imroot class_id <<< "${imroot_and_class_idi[@]}"
+                echo $i
+                echo $imroot
+                echo $class_id
+                python scripts/collect_images.py --dataset $dataset  --arch $arch --imroot "${imroot}" --class_id "${class_id}"
+                ((++i))
+                # if [ "$i" -ge $n_visualize ]; then
+                #     break
+                # fi;
+            done
+        done
+    done
     cd $curdir
+    set +x
 }
 
-function runrankelpgp(){
+function visualizeforpaper(){
+    set -x
+    local dataset="voc_2007"
+    local simplemethod="extremal_perturbation_with_simple_scale_and_crop_normalized"
+    local elpgpmethod="extremal_perturbation_with_simple_scale_and_crop_with_gp"
+    local archs=("resnet50" "vgg16")
+
+    for arch in ${archs[@]};do
+        #local arch="resnet50"
+        #local failurefile="/root/bigfiles/other/metrics-torchray/failures_for_anchor_grad_cam_arch_resnet50_imroots_and_class_ids"
+        #local bestfile="/root/bigfiles/other/metrics-torchray/cherry_picked_for_anchor_grad_cam_arch_resnet50_imroots_and_class_ids"
+        local bestfile="/root/bigfiles/other/metrics-torchray/where_elp_gp_beter_anchor_extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_arch_${arch}_imroots_and_class_ids"
+        local failurefile="/root/bigfiles/other/metrics-torchray/failures_for_elp_gp_anchor_extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_arch_${arch}_imroots_and_class_ids"
+        local betterthancropfile="/root/bigfiles/other/metrics-torchray/where_elp_gp_beter_elp_crop_anchor_extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_arch_${arch}_imroots_and_class_ids"
+
+        #local n_failures=4
+        #local n_success=4
+        local n_visualize=4
+        fnames=("$failurefile" "$bestfile" "$betterthancropfile")
+        for fname in "${fnames[@]}";do
+            local i=0
+            # python -c "with open('$failurefile','r') as f:pickle.readlines(f)"
+            mapfile -t imroot_and_class_id < "$fname"
+            #echo ${imroot_and_class_id[@]}
+            #echo ${imroot_and_class_id[0]}
+            for imroot_and_class_idi in "${imroot_and_class_id[@]}";do
+                echo "$imroot_and_class_idi"
+                read -r imroot class_id <<< "${imroot_and_class_idi[@]}"
+                echo $i
+                echo $imroot
+                echo $class_id
+                #read -p "(Continue)" _dummy
+                python -m torchray.benchmark.backend_for_run_on_image --imroot $imroot --class_id $class_id --dataset $dataset --method $elpgpmethod --arch $arch && \
+                python -m torchray.benchmark.backend_for_run_on_image --imroot $imroot --class_id $class_id --dataset $dataset --method $simplemethod --arch $arch
+                ((++i))
+                if [ "$i" -ge $n_visualize ]; then
+                    break
+                fi;
+            done
+        done
+    done
+    collectimagesforpaper
+    set +x
+}
+
+function createattributionimagesforpaper(){
+    set -x
     curdir=`pwd`
     cdelp
-    python examples/rank_correlation.py --arch resnet50 --dataset voc_2007 --methods extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng1 extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng2 extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng3  --desc  extremal_perturbation_with_simple_scale_and_crop_with_gp_log_prob
+    local dataset="voc_2007"
+    local archs=("resnet50" "vgg16")
+    local methodnames=("rise" "grad_cam" "gradient" "guided_backprop" "excitation_backprop")
+    # local methodnames=("grad_cam")
+    for arch in "${archs[@]}";do
+        for method in "${methodnames[@]}";do
+            local bestfile="/root/bigfiles/other/metrics-torchray/where_elp_gp_beter_anchor_extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_arch_${arch}_imroots"
+
+            python  examples/attribution_benchmark.py --method "$method" --arch "$arch" --dataset "$dataset" --save_detailed_results true --use_dofilelist "$bestfile"
+        done
+    done
+    
     cd $curdir
+    set +x
+
 }
-alias vimcollect="cdelp;vim scripts/collect_results.py"
-alias runcollect="cdelp;python scripts/collect_results.py"
+function createandcollectattributionimagesforpaper(){
+    createattributionimagesforpaper
+    collectimagesforpaper
+}

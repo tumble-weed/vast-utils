@@ -23,19 +23,26 @@ nvidia-smi
 }
 #VASTID="vast-109"
 #if ! [ -v pre_PS1 ]; then
-  pre_PS1=PS1
-  PS1="${PS1}(${VASTID})"
+#  pre_PS1=PS1
+#  PS1="${PS1}(${VASTID})"
 #fi
 
 function set-title() {
   if [[ -z "$ORIG" ]]; then
     ORIG=$PS1
   fi
-  TITLE="\[\e]2;$*\a\]"
+  title="$*"
+  TITLE="\[\e]2;$title\a\]"
   PS1=${ORIG}${TITLE}
 }
+function get-title(){
+#title=$(echo "$TITLE" | sed -n 's/\\[\e]2;\(.*\)\\a\\]/\1/p')
+# \[\e]2;aniket\a\]
+title=$(echo "$TITLE" | sed -n 's/\\\[\\e\]2;\(.*\)\\a\\\]/\1/p')
+echo $title
+    }
 
-set-title $VASTID
+#set-title $VASTID
 FREQCOM=/root/frequent_commands
 
 function nsmi {
@@ -346,9 +353,32 @@ alias refreshshortcuts="source /root/vast-utils/shortcuts.sh;source /root/vast-u
 alias vimshortcuts="vim /root/vast-utils/shortcuts.sh;source /root/vast-utils/shortcuts.sh"
 alias vimtmpalias="vim /root/vast-utils/tmp_alias.sh;source /root/vast-utils/tmp_alias.sh"
 alias cdvutils='cd /root/vast-utils'
-alias vimtodo="set-title todo; cd /root/todo/ && vim /root/todo/todo && git a todo && git c 'todo' && git pu && cd -"
+#alias vimtodo="old_title=\"`get-title`\";set-title todo; cd /root/todo/ && vim /root/todo/todo && git a todo && git c 'todo' && git pu && cd -; set-title ${old_title}"
+function vimtodo(){
+    #set -e
+    old_title=`get-title`
+    #echo "printing old title"
+    #get-title
+    set-title todo; 
+    cd /root/todo/
+    fname="$1"
+    echo $fname
+    if [ -z "$fname" ];then
+       vim /root/todo/todo
+    else
+       vim /root/todo/$fname
+    fi
+    git a . && git c 'todo' && git pu && cd -
+    set-title $old_title
+    #set +e
+    }
+alias vimtodomulti="vimtodo multi"
 #alias vimtodo2="set-title todo2; cd /root/todo2/ && vim /root/todo2/todo2 && git a . && git c 'todo2' && git pu && cd -"
 function vimtodo2(){
+    #set -e
+    old_title=`get-title`
+    #echo "printing old title"
+    #get-title
     set-title todo2; 
     cd /root/todo2/
     fname="$1"
@@ -359,7 +389,20 @@ function vimtodo2(){
        vim /root/todo2/$fname
     fi
     git a . && git c 'todo2' && git pu && cd -
+    set-title $old_title
+    #set +e
     }
+alias vimtodo2ps="vimtodo2 ps"
+alias vimtodops="vimtodo2 ps"
+alias vimtodo2psych="vimtodo2 ps"
+alias vimtodopsych="vimtodo2 ps"
+alias vimtodo2phys="vimtodo2 phys"
+alias vimtodophys="vimtodo2 phys"
+alias vimtodo2job="vimtodo2 job"
+alias vimtodojob="vimtodo2 job"
+alias vimtodo2hiring="vimtodo2 hiring"
+alias vimtodohiring="vimtodo2 hiring"
+
 alias vimssh="vim /root/.ssh/config"
 source /root/vast-utils/tmp_alias.sh
 function cdparent(){
@@ -369,3 +412,48 @@ function cdparent(){
 }
 alias killlast="kill %%"
 alias f='realpath'
+
+function upload_instance_to_gdrive_(){
+
+    source /root/instance_info.sh
+    echo $VASTID    
+    while true;do
+        rclone copy -P /root/evaluate-saliency-4 aniketsinghresearch-gdrive:$VASTID/evaluate-saliency-4
+        rclone copy -P /root/vast-utils aniketsinghresearch-gdrive:$VASTID/vast-utils
+        sleep 10
+    done
+    
+    
+}
+upload_instance_to_gdrive()
+{(
+    # source /root/instance_info.sh
+    # echo $VASTID
+    tmux kill-session t-rclone-instance
+    # tmux new-session -d -s t-rclone-instance 'watch  -n 10 "{
+    # rclone copy -P /root/evaluate-saliency-4 aniketsinghresearch-gdrive:$VASTID/evaluate-saliency-4
+    # rclone copy -P /root/vast-utils aniketsinghresearch-gdrive:$VASTID/vast-utils
+    # }"'
+    tmux new-session -d -s t-rclone-instance "bash -i -c \"upload_instance_to_gdrive_\""
+
+    tmux a -t t-rclone-instance
+    #rclone copy -P /root/bigfiles/other/metrics-torchray aniketsinghresearch-gdrive:metrics-torchray
+    )
+}
+gitacpp ()
+{ local mesg="$1"
+shift
+fnames=("$@")
+#echo "mesg $mesg"
+for fname in "${fnames[@]}";do
+    #echo $fname
+    #echo "----"
+    git a $fname
+    done
+git cpp "$mesg"
+
+    }
+
+alias tmaviz="tma t-visualize"
+alias tmaselect="tma t-select"
+alias tmasummary="tma t-summary"

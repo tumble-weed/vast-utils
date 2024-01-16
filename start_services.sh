@@ -29,3 +29,12 @@ else
     echo "tmux session named t-http is already running."
 fi
 #xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+cd /root
+# Check if a tmux session named "t-jup" exists
+tmux has-session -t t-http 2>/dev/null
+if [ $? != 0 ]; then
+    tmux new-session -d -s t-fb "filebrowser -r /root -p 9999"
+else
+    echo "tmux session named t-fb is already running."
+fi
+

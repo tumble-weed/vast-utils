@@ -46,4 +46,5 @@ echo "source $DIR/setup_tmux.sh" >> /root/.bashrc
 echo "conda activate gpnnenv" >> /root/.bashrc
 bash $DIR/add_after.sh
 bash $DIR/setup_code_server.sh
+bash $DIR/setup_filebrowser.sh
 set +x
