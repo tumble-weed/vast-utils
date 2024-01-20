@@ -185,6 +185,37 @@ function correctallpointing(){
     correctpointing grad_cam vgg16
 }
 
+function correctelp(){
+    #correctpointing grad_cam resnet50
+    #correctpointing grad_cam vgg16
+
+
+    #correctpointing rise resnet50
+    #correctpointing rise vgg16
+
+    #correctpointing gradient resnet50
+    #correctpointing gradient vgg16
+
+    #correctpointing guided_backprop resnet50
+    #correctpointing guided_backprop vgg16
+
+    correctpointing extremal_perturbation resnet50
+    correctpointing extremal_perturbation vgg16
+}
+
+function correctunw(){
+    correctpointing extremal_perturbation_with_unweighted_scale_and_crop resnet50
+    correctpointing extremal_perturbation_with_unweighted_scale_and_crop vgg16
+    }
+function correctsimple(){
+    correctpointing extremal_perturbation_with_simple_scale_and_crop_normalized resnet50
+    correctpointing extremal_perturbation_with_simple_scale_and_crop_normalized vgg16
+    }
+
+function correctgp(){
+    correctpointing gp_saliency resnet50
+    correctpointing gp_saliency vgg16
+    }
 
 __runjson_completion() {
         local cur prev
@@ -262,6 +293,24 @@ function upload_bigfiles_other(){
     tmux new-session -d -s t-rclone-bigfiles "bash -i -c \"upload_bigfiles_other_\""
     tmux a -t t-rclone-bigfiles
     }
+function upload_bigfiles_dataset_(){
+    while true;do
+        rclone copy -P  /root/bigfiles/dataset aniketsinghresearch-gdrive:dataset
+        sleep 10
+    done
+
+    }
+
+function upload_bigfiles_dataset(){
+    tmux kill-session t-rclone-dataset    
+    tmux new-session -d -s t-rclone-dataset "bash -i -c \"upload_bigfiles_dataset_\""
+    tmux a -t t-rclone-dataset
+    }
+function upload_all_gdrive(){
+    upload_bigfiles_other
+    upload_bigfiles_dataset
+    upload_instance_to_gdrive
+}
 alias vimworkflow="vim /root/evaluate-saliency-4/elp_with_scales/scripts/workflow.py"
 alias vim112="vim /root/evaluate-saliency-4/elp_with_scales/run-scripts/run_vast_112.sh"
 alias run112="cdelp;bash run-scripts/run_vast_112.sh"
@@ -320,25 +369,37 @@ function tryvisualizesimple(){
 function runranksimplenormalized(){
     local curdir=`pwd`
     cdelp
-    python examples/rank_correlation.py --arch resnet50 --dataset voc_2007 --methods extremal_perturbation_with_simple_scale_and_crop_normalized_rng1 extremal_perturbation_with_simple_scale_and_crop_normalized_rng2 extremal_perturbation_with_simple_scale_and_crop_normalized_rng3  --desc  extremal_perturbation_with_simple_scale_and_crop_normalized 
+    python examples/rank_correlation.py --arch resnet50 --dataset voc_2007 --methods extremal_perturbation_with_simple_scale_and_crop_normalized extremal_perturbation_with_simple_scale_and_crop_normalized_rng2 extremal_perturbation_with_simple_scale_and_crop_normalized_rng3  --desc  extremal_perturbation_with_simple_scale_and_crop_normalized 
     cd $curdir
 }
 
 function runrankelpgp(){
     local curdir=`pwd`
     cdelp
-    python examples/rank_correlation.py --arch resnet50 --dataset voc_2007 --methods extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng1 extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng2 extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng3  --desc  extremal_perturbation_with_simple_scale_and_crop_with_gp_log_prob
+    python examples/rank_correlation.py --arch resnet50 --dataset voc_2007 --methods extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1 extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng2 extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_rng3  --desc  extremal_perturbation_with_simple_scale_and_crop_with_gp_log_prob
     cd $curdir
 }
+function runrank(){
+    runrankelpgp
+    runranksimplenormalized
+    }
 alias vimcollect="cdelp;vim scripts/collect_results.py"
+alias vimcollectimages="cdelp;vim scripts/collect_images.py"
 alias runcollect="cdelp;python scripts/collect_results.py"
+function collectallresultsforpaper(){
+    curdir=`pwd`
+    cdelp
+    python scripts/collect_results.py --arch resnet50
+    python scripts/collect_results.py --arch vgg16
+    cd $curdir
+}
 alias runcollectimages="cdelp;python scripts/collect_images.py"
 alias vimpointing="cdelp;vim /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark/pointing_game.py; cd-"
 alias vimdeletiont="cdelp;vim /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark/deletion_game.py; cd-"
 alias trygradcam="cdelp;python examples/attribution_benchmark.py --method grad_cam --arch resnet50 --dataset voc_2007"
 alias trydeletiont="cdelp;pythond examples/attribution_benchmark.py --method grad_cam --arch resnet50 --dataset voc_2007 --metrics deletion_game"
 alias trypointingt="cdelp;pythond examples/attribution_benchmark.py --method grad_cam --arch resnet50 --dataset voc_2007"
-
+alias nexttask="echo \"summarize_elp;runcollect\""
 ELPGP="extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1"
 ELP_SIMPLE="extremal_perturbation_with_simple_scale_and_crop_normalized"
 UNW="extremal_perturbation_with_unweighted_scale_and_crop-"
@@ -439,8 +500,8 @@ function selectwhereelpgpbad(){
     local arch=$1
     local dataset="voc_2007"
     local methodnames=("$ELPGP" "extremal_perturbation")
-    local anchor_method="$ELPGP"
-    local anchor_state="-1"
+    local anchor_method="extremal_perturbation"
+    local anchor_state="1"
     python examples/select_results.py --modelname $arch --dataset $dataset --methodnames ${methodnames[@]} --anchor_method $anchor_method --anchor_state $anchor_state --saveroot failures_for_elp_gp
     cd $curdir
 }
@@ -450,8 +511,8 @@ function selectwhereelpgpgoodelpcropbad(){
     local arch=$1
     local dataset="voc_2007"
     local methodnames=("$ELPGP" "$ELP_SIMPLE")
-    local anchor_method="$ELPGP"
-    local anchor_state=1
+    local anchor_method="$ELP_SIMPLE"
+    local anchor_state=-1
     python examples/select_results.py --modelname $arch --dataset $dataset --methodnames ${methodnames[@]} --anchor_method $anchor_method --anchor_state $anchor_state --saveroot where_elp_gp_beter_elp_crop
     cd $curdir
 }
@@ -465,6 +526,8 @@ function selectimagesforpaper(){
 }
 #===========================================================================================
 alias trycifar="cdelp;python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --arch resnet8 --dataset cifar-10 --metrics deletion_game"
+alias trycifarvgg="cdelp;python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --arch vgg16 --dataset cifar-10 --metrics deletion_game"
+alias trymnist="cdelp;python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --arch resnet8 --dataset mnist --metrics deletion_game"
 #function visualizeforpaper(){
 #    set -x
 #    local imroot="000013" #imroot="000116"
@@ -522,6 +585,7 @@ function vimallrun(){
 }
 function collectimagesforpaper(){
     set -x
+    fnames=${*:-("bestfile" "failurefile" "betterthancropfile")}
     curdir=`pwd`
     cdelp
     local dataset="voc_2007"
@@ -529,6 +593,11 @@ function collectimagesforpaper(){
     # local n_visualize=4
     for arch in ${archs[@]};do
         local bestfile="/root/bigfiles/other/metrics-torchray/where_elp_gp_beter_anchor_extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_arch_${arch}_imroots_and_class_ids"
+        #local failurefile="/root/bigfiles/other/metrics-torchray/failures_for_elp_gp_anchor_extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_arch_${arch}_imroots_and_class_ids"
+        local failurefile="/root/bigfiles/other/metrics-torchray/failures_for_elp_gp_anchor_extremal_perturbation_arch_${arch}_imroots_and_class_ids"
+        local betterthancropfile="/root/bigfiles/other/metrics-torchray/where_elp_gp_beter_elp_crop_anchor_${ELP_SIMPLE}_arch_${arch}_imroots_and_class_ids"
+        #fnames=("$bestfile" "$failurefile" "$betterthancropfile")
+        #fnames=("$failurefile" "$betterthancropfile")
         fnames=("$bestfile")
         # cdelp
         
@@ -542,7 +611,11 @@ function collectimagesforpaper(){
                 echo $i
                 echo $imroot
                 echo $class_id
-                python scripts/collect_images.py --dataset $dataset  --arch $arch --imroot "${imroot}" --class_id "${class_id}"
+                if [ "$fname" == "$bestfile" ]; then
+                    python scripts/collect_images.py --dataset $dataset  --arch $arch --imroot "${imroot}" --class_id "${class_id}"
+                else
+                    python scripts/collect_images.py --dataset $dataset  --arch $arch --imroot "${imroot}" --class_id "${class_id}" --methodnames extremal_perturbation extremal_perturbation_with_simple_scale_and_crop_normalized  extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1
+                fi
                 ((++i))
                 # if [ "$i" -ge $n_visualize ]; then
                 #     break
@@ -623,3 +696,16 @@ function createandcollectattributionimagesforpaper(){
     createattributionimagesforpaper
     collectimagesforpaper
 }
+alias cdcifarvgg="cd /root/evaluate-saliency-4/pytorch-vgg-cifar10/pytorch_vgg_cifar10"
+alias vimcifarvgg="cd /root/evaluate-saliency-4/pytorch-vgg-cifar10/pytorch_vgg_cifar10/vgg.py"
+function rmvisualization(){
+read -p "DANGEROUS!, removing /root/bigfiles/other/metrics-torchray/visualization (y/n)" flag
+if [[ "$flag" == "y" ]]; then
+    echo "deleting"
+    rm -rf /root/bigfiles/other/metrics-torchray/visualization 
+    history -d $(($HISTCMD-1))
+
+    fi
+
+
+    }

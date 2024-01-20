@@ -63,7 +63,7 @@ function pyl {
 function tmn {
     tmux new -s $1
 }
-export GH=
+#export GH=
 source $GPNN/frequent_commands.sh
 git config --global user.email "aniketsinghresearch@gmail.com"
 git config --global user.name "Aniket Singh"
@@ -418,7 +418,11 @@ function upload_instance_to_gdrive_(){
     source /root/instance_info.sh
     echo $VASTID    
     while true;do
+        rclone copy -P /root/instance_info.sh aniketsinghresearch-gdrive:$VASTID/
+        rclone copy -P /root/todo2 aniketsinghresearch-gdrive:$VASTID/todo2
         rclone copy -P /root/evaluate-saliency-4 aniketsinghresearch-gdrive:$VASTID/evaluate-saliency-4
+        rclone copy -P /root/myhelp aniketsinghresearch-gdrive:$VASTID/myhelp
+        rclone copy -P /root/todo aniketsinghresearch-gdrive:$VASTID/todo
         rclone copy -P /root/vast-utils aniketsinghresearch-gdrive:$VASTID/vast-utils
         sleep 10
     done
@@ -457,3 +461,25 @@ git cpp "$mesg"
 alias tmaviz="tma t-visualize"
 alias tmaselect="tma t-select"
 alias tmasummary="tma t-summary"
+#function findbash(){
+#    name="$1"
+#    shopt -s extdebug; declare -Ff "$name"; shopt -u extdebug
+#}
+
+findbash(){
+  # https://askubuntu.com/a/1146283
+  target="$@"
+  files=( ~/.bashrc ~/.profile ~/.bash_profile ~/.bash.login
+         ~/.bash_aliases /etc/bash.bashrc /etc/profile
+         /etc/profile.d/* /etc/environment)
+    while IFS= read -r file; do
+      files+=( "$file" )
+    done < <(grep -hPo '(^|\s)(\.|source)\s+\K\S+'  "${files[@]}" 2>/dev/null)
+    for file in "${files[@]}"; do
+      ## The tilde of ~/ can break this
+      file=$(sed 's|~/|'"$HOME"'/|g' <<<"$file")
+      if [[ -e $file ]]; then
+        grep -H "$target" -- "$file"
+      fi
+    done
+}
