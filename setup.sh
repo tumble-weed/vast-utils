@@ -29,6 +29,7 @@ touch /root/.no_auto_tmux
 #bash install.sh
 bash setup_git.sh
 bash setup_gcc.sh
+bash setup_fix_for_opencv.sh
 bash install_unzip.sh
 bash install_gdown.sh
 bash install_gh.sh
