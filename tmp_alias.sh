@@ -240,6 +240,11 @@ function genrunscript(){
     cdelp
     cd run-scripts
     python generate_run_script.py --json_filename run-jsons/$json_filename
+    if [ -v DBG_TORCHRAY ] && [ "$DBG_TORCHRAY" -eq 1 ];then
+        pythond generate_run_script.py --json_filename run-jsons/$json_filename
+    else
+        python generate_run_script.py --json_filename run-jsons/$json_filename
+    fi
     cd $start_dir
 }
 
@@ -276,6 +281,13 @@ function vimrunscript(){
 }
 complete -F __runscript_completion vimrunscript
 
+function runtorchray(){
+    local fname="$1"
+    cd /root/evaluate-saliency-4/elp_with_scales/
+    bash run-scripts/$fname
+    cd -
+}
+complete -F __runscript_completion runtorchray
 
 function upload_bigfiles_other_(){
     while true;do
@@ -308,8 +320,8 @@ function upload_bigfiles_dataset(){
     }
 function upload_all_gdrive(){
     upload_bigfiles_other
-    upload_bigfiles_dataset
     upload_instance_to_gdrive
+    #upload_bigfiles_dataset
 }
 alias vimworkflow="vim /root/evaluate-saliency-4/elp_with_scales/scripts/workflow.py"
 alias vim112="vim /root/evaluate-saliency-4/elp_with_scales/run-scripts/run_vast_112.sh"
@@ -339,7 +351,7 @@ function checkallresultstorchray(){
 alias trycameras="python examples/attribution_benchmark.py --method CAMERAS --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 function checkgit(){
     #set -e
-    dirs=("/root/evaluate-saliency-4/elp_with_scales" "/root/evaluate-saliency-4/cam-benchmark" "/root/vast-utils/" "/root/evaluate-saliency-4/dutils" "/root/evaluate-saliency-4/CAMERAS" "/root/evaluate-saliency-4/sess")
+    dirs=("/root/evaluate-saliency-4/elp_with_scales" "/root/evaluate-saliency-4/cam-benchmark" "/root/vast-utils/" "/root/evaluate-saliency-4/dutils" "/root/evaluate-saliency-4/CAMERAS" "/root/evaluate-saliency-4/sess" "/root/evaluate-saliency-4/pytorch-vgg-cifar10" "/root/cifar10-fast-simple/")
     for d in "${dirs[@]}"; do
         tmux new-session -d -s t-git "cd $d; git s;bash"
         tma t-git
@@ -481,7 +493,7 @@ sshelp ()
     local instance_id="$1"
     ssh -t vast-$instance_id "cd $ELP;bash"
     }
-alias cdcifar="cd /root/evaluate-saliency-4/cifar10-fast-simple"
+alias cdcifar="cd /root/evaluate-saliency-4/cifar10-fast-simple/resnet8_fast_simple"
 #===========================================================================================
 function selectwhereelpgpbest(){
     local curdir=`pwd`
@@ -525,9 +537,9 @@ function selectimagesforpaper(){
     selectwhereelpgpgoodelpcropbad resnet50
 }
 #===========================================================================================
-alias trycifar="cdelp;python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --arch resnet8 --dataset cifar-10 --metrics deletion_game"
+alias trycifar="cdelp;DBG_GRADCAM=1 python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --arch resnet8 --dataset cifar-10 --metrics deletion_game"
 alias trycifarvgg="cdelp;python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --arch vgg16 --dataset cifar-10 --metrics deletion_game"
-alias trymnist="cdelp;python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --arch resnet8 --dataset mnist --metrics deletion_game"
+alias trymnist="cdelp;DBG_GRADCAM=1 python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --arch resnet8 --dataset mnist --metrics deletion_game"
 #function visualizeforpaper(){
 #    set -x
 #    local imroot="000013" #imroot="000116"
@@ -564,7 +576,232 @@ alias trymnist="cdelp;python -m ipdb -c c examples/attribution_benchmark.py --me
 #    done
 #    set +x
 #}
+function runsmaller() {
+    set -u
+    trap "set +u" EXIT
+    trap "set +u" ERR
+    #set -x
+    #"""
+    #integrated_gradient
+    #grad_cam
+    #guided_backprop
+    #gradient
+    #"""
+    methods=("integrated_gradients" "grad_cam" "guided_backprop" "gradient" "multithresh_saliency")
+    #methods=("integrated_gradients")
+    #methods=("grad_cam" "guided_backprop" "gradient")
+    save_detailed_results="true"
+    #arch="resnet8"
+    arch="$1"
+    #dataset="cifar-10"
+    dataset="$2"
+    #..............................................
+    continue_=""
+    if [ -v CONTINUE ] && [ $CONTINUE == true ]; then
+        continue_="--continue_"
+    fi
+    #..............................................
+    dry_run=""
+    echo "DRY_RUN $DRY_RUN"
+    if [ -v DRY_RUN ] && [ $DRY_RUN == true ]; then
+        dry_run="--start 1000 --end 1004"
+        #dry_run=""
+        #dry_run="--start 1000 --end 1004"
+    fi
+    echo "$dry_run"
+    #..............................................
+    base_command="python examples/attribution_benchmark.py --arch ${arch} --dataset ${dataset} --save_detailed_results ${save_detailed_results} ${dry_run} --metrics deletion_game $continue_"
+    for method in "${methods[@]}";do
+        full_command="$base_command --method $method"
+        #echo "Im executing ${full_command}"
+        cdelp
+        #output=`$full_command`
+        echo ${full_command}
+        $full_command
+        #&& cdresults && bash
+    done
+    #set +x
+    }
+function runallsmaller() {
+    """
+    archs: resnet8, vgg16
+    datasets: cifar-10,cifar-100,mnist
+    """
+    set -u
+    trap "set +u" EXIT
+    trap "set +u" ERR
+#    python -c """
+#import argparse
+#parser = argparse.ArgumentParser()
+#parser.add_argument('--archs'
+#argparse.parse_args()
+#"""
+    local archs="${1:-("resnet8")}"
+    #shift
+    #archs=("resnet8")
+    #local datasets=("cifar-10" "cifar-100" "mnist")
+    local datasets=("cifar-100" "mnist"  "cifar-10")
+    #local archs=("resnet8" "vgg16")
+    #local dry_run="--start 1000 --end 1004"
+    local CONTINUE=${CONTINUE:-true}
+    local DRY_RUN=false
+    for arch in "${archs[@]}"; do
+        for dataset in "${datasets[@]}"; do
+            #echo "Processing: Arch=$i, Dataset=$j"
+            cmd="runsmaller $arch $dataset"
+            echo "$cmd"
+            ${cmd}
+        done
+    done
+    #set +u
+}
+
 PASCALDIR="/root/bigfiles/dataset/voc/VOCdevkit/VOC2007/JPEGImages"
+
+
+
+
+function createattributionimagesforpaper(){
+    set -x
+    curdir=`pwd`
+    cdelp
+    local dataset="voc_2007"
+    local archs=("resnet50" "vgg16")
+    local methodnames=("rise" "grad_cam" "gradient" "guided_backprop" "excitation_backprop")
+    # local methodnames=("grad_cam")
+    for arch in "${archs[@]}";do
+        for method in "${methodnames[@]}";do
+            local bestfile="/root/bigfiles/other/metrics-torchray/where_elp_gp_beter_anchor_extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_arch_${arch}_imroots"
+
+            python  examples/attribution_benchmark.py --method "$method" --arch "$arch" --dataset "$dataset" --save_detailed_results true --use_dofilelist "$bestfile"
+        done
+    done
+    
+    cd $curdir
+    set +x
+
+}
+function createandcollectattributionimagesforpaper(){
+    createattributionimagesforpaper
+    collectimagesforpaper
+}
+alias cdcifarvgg="cd /root/evaluate-saliency-4/pytorch-vgg-cifar10/pytorch_vgg_cifar10"
+alias vimcifarvgg="cd /root/evaluate-saliency-4/pytorch-vgg-cifar10/pytorch_vgg_cifar10/vgg.py"
+function rmvisualization(){
+read -p "DANGEROUS!, removing /root/bigfiles/other/metrics-torchray/visualization (y/n)" flag
+if [[ "$flag" == "y" ]]; then
+    echo "deleting"
+    rm -rf /root/bigfiles/other/metrics-torchray/visualization 
+    history -d $(($HISTCMD-1))
+
+    fi
+
+
+    }
+alias rungradcamcifar10resnet8="cdelp;pythond examples/attribution_benchmark.py --method grad_cam --arch resnet8 --dataset cifar-10 --metrics deletion_game --save_detailed_results true"
+alias runguidedcifar10resnet8="cdelp;pythond examples/attribution_benchmark.py --method guided_backprop --arch resnet8 --dataset cifar-10 --metrics deletion_game --save_detailed_results true  --continue_ true"
+#================================================================================
+alias traincifar10resnet8="cdcifar;pythond train.py"
+alias traincifar100resnet8="cdcifar;pythond train.py --dataset cifar-100 --epochs 50"
+alias trainmnistresnet8="cdcifar;pythond train.py --dataset mnist --epochs 10"
+function trainallresnet8(){
+traincifar10resnet8
+traincifar100resnet8
+trainmnistresnet8
+    }
+function trainvgg(){
+    dataset=$1
+    declare -A lrs
+    lrs["cifar-10"]=0.05
+    lrs["cifar-100"]=0.05
+    lrs["mnist"]=0.005
+    curdir=`pwd`
+    cdcifarvgg
+    echo $dataset
+    lr=${lrs["${dataset}"]}
+    #echo $lr
+    python main.py  --arch=vgg16 --epochs 300 --dataset ${dataset} --save-dir="save_vgg16_${dataset}" --lr "$lr" |& tee "log_vgg16_${dataset}"
+    cd $curdir
+    }
+#================================================================================
+#================================================================================
+#alias traincifar10vgg16="cdcifarvgg;python main.py  --arch=vgg16 --epochs 300 --dataset cifar-10 --save-dir=save_vgg16_cifar-10 |& tee -a log_$model"
+#alias traincifar100vgg16="cdcifarvgg;python main.py  --arch=vgg16 --epochs 300 --dataset cifar-100 --save-dir=save_vgg16_cifar-100 |& tee -a log_$model"
+#alias trainmnistvgg16="cdcifarvgg;python main.py  --arch=vgg16 --epochs 300 --dataset mnist --save-dir=save_vgg16_mnist  --lr 0.005|& tee -a log_$model"
+function trainallvgg16(){
+#traincifar100vgg16
+#traincifar10vgg16
+#trainmnistvgg16
+ trainvgg cifar-10
+ trainvgg cifar-100
+ trainvgg mnist
+    }
+
+alias runigcifar10resnet8="cdelp;pythond examples/attribution_benchmark.py --method integrated_gradients --arch resnet8 --dataset cifar-10 --metrics deletion_game --save_detailed_results true"
+alias rungroupcam="cdelp;DBG_GROUPCAM=1 pythond examples/attribution_benchmark.py --method groupcam --arch resnet50  --save_detailed_results true"
+alias runscorecam="cdelp;DBG_SCORECAM=1 pythond examples/attribution_benchmark.py --method scorecam --arch resnet50  --save_detailed_results true"
+alias vimgroup="vim /root/evaluate-saliency-4/elp_with_scales/torchray/wrappers_for_torchray/groupcam_wrapper.py"
+alias cdtorchraywrappers="cd /root/evaluate-saliency-4/elp_with_scales/torchray/wrappers_for_torchray"
+alias runmulticifar10resnet8="cdelp;DBG_MULTIWRAPPER= pythond examples/attribution_benchmark.py --method multithresh_saliency --arch resnet8 --dataset cifar-10 --metrics deletion_game --save_detailed_results true"
+alias runmulticifar100resnet8="cdelp;DBG_MULTIWRAPPER= pythond examples/attribution_benchmark.py --method multithresh_saliency --arch resnet8 --dataset cifar-100 --metrics deletion_game --save_detailed_results true"
+alias runmultimnistresnet8="cdelp;pythond examples/attribution_benchmark.py --method multithresh_saliency --arch resnet8 --dataset mnist --metrics deletion_game --save_detailed_results true"
+alias runmulticifar10vgg16="cdelp;DBG_MULTIWRAPPER= pythond examples/attribution_benchmark.py --method multithresh_saliency --arch vgg16 --dataset cifar-10 --metrics deletion_game --save_detailed_results true"
+alias runmultimnistvgg16="cdelp;pythond examples/attribution_benchmark.py --method multithresh_saliency --arch vgg16 --dataset mnist --metrics deletion_game --save_detailed_results true"
+alias runmulticifar100vgg16="cdelp;DBG_MULTIWRAPPER= pythond examples/attribution_benchmark.py --method multithresh_saliency --arch vgg16 --dataset cifar-100 --metrics deletion_game --save_detailed_results true"
+alias runigosppcifar10resnet8="cdelp;pythond examples/attribution_benchmark.py --method IGOSpp --arch resnet8 --dataset cifar-10 --metrics deletion_game --save_detailed_results true"
+alias vimtorchraysmallerdataset='vim /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark/smaller_datasets.py'
+alias vimtorchraymodels='vim /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark/models.py'
+function undo_e(){
+    set +e
+    }
+function runallimagenet(){
+    set -e
+    trap undo_e EXIT
+    trap undo_e ERR
+    dataset="imagenet-5000"
+    archs=("vgg16" "resnet50")
+    #methods=("grad_cam" "rise" "groupcam" "scorecam" "guided_backprop" "gradient" "SESS")
+    methods=("rise" "groupcam" "scorecam" "SESS")
+    use_compiled_model=false
+    curdir=`pwd`
+    cdelp
+    for arch in "${archs[@]}";do
+        for method in "${methods[@]}";do
+            python examples/attribution_benchmark.py --method $method --continue_ --arch $arch --dataset $dataset --save_detailed_results true --use_compiled_model ${use_compiled_model}
+        done
+    done
+    cd $curdir
+    }
+alias vimmultiwrapper="vim /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency/wrapper_for_torchray.py"
+alias vimtorchraydataset='vim /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark/datasets.py'
+function tmn2(){
+# tmn2 t-eric3
+    name="$1"
+#name="t-eric3"
+    datestr=`python -c "import time;print(time.strftime('%d-%m-%Y-%H-%M-%S'))"`
+    recordname="tmux-session-logs/${name}-${datestr}.txt"
+    tmux new-session -d -s "$name" "script $recordname"
+# start a tmux session in background (d), run the script command in it, with the filename tmux-session-logs/t-eric3.txt
+    tmux a -t $name
+# attach to the back ground session ( i.e. bring it foreground)
+    }
+#ADDNEW
+function summarize_all_deletion(){
+local datasets=("cifar-10" "cifar-100" "mnist")
+local methods=("integrated_gradients" "grad_cam" "guided_backprop" "gradient")
+local archs=("resnet8" "vgg16")
+for dataset in "${datasets[@]}"
+do
+    for method in "${methods[@]}"
+    do
+        for arch in "${archs[@]}"
+        do
+            python summarize_deletion.py --method "${method}" --arch "${arch}" --dataset "${dataset}"
+            return 0
+        done
+    done
+done
+}
 function vimallrun(){
     local curdir=`pwd`
     cdrunscripts
@@ -583,6 +820,7 @@ function vimallrun(){
         done 
     cd $curdir
 }
+
 function collectimagesforpaper(){
     set -x
     fnames=${*:-("bestfile" "failurefile" "betterthancropfile")}
@@ -671,41 +909,33 @@ function visualizeforpaper(){
     collectimagesforpaper
     set +x
 }
-
-function createattributionimagesforpaper(){
-    set -x
-    curdir=`pwd`
-    cdelp
-    local dataset="voc_2007"
-    local archs=("resnet50" "vgg16")
-    local methodnames=("rise" "grad_cam" "gradient" "guided_backprop" "excitation_backprop")
-    # local methodnames=("grad_cam")
-    for arch in "${archs[@]}";do
-        for method in "${methodnames[@]}";do
-            local bestfile="/root/bigfiles/other/metrics-torchray/where_elp_gp_beter_anchor_extremal_perturbation_with_simple_scale_and_crop_with_gp_gp_y_modelog_prob_gp_ncrops1100_gp_sample1_freq1_arch_${arch}_imroots"
-
-            python  examples/attribution_benchmark.py --method "$method" --arch "$arch" --dataset "$dataset" --save_detailed_results true --use_dofilelist "$bestfile"
-        done
-    done
-    
-    cd $curdir
-    set +x
-
+alias vimdebugmulti="vim /root/debug-multi"
+alias vimmulti="vim /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency/multithresh_saliency_.py"
+alias vimelpmasking="vim /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency/elp_masking.py"
+alias vimtorchrayutils="vim /root/evaluate-saliency-4/elp_with_scales/torchray/utils.py"
+igosppwrapper="/root/evaluate-saliency-4/elp_with_scales/torchray/wrappers_for_torchray/IGOSpp_wrapper.py"
+alias vimigosppwrapper="vim $igosppwrapper"
+sesswrapper="/root/evaluate-saliency-4/elp_with_scales/torchray/wrappers_for_torchray/SESS_wrapper.py"
+alias vimsesswrapper="vim $sesswrapper"
+alias cdigospp="cd /root/evaluate-saliency-4/IGOS_pp/IGOS_pp"
+alias vimigospp="vim /root/evaluate-saliency-4/IGOS_pp/IGOS_pp/methods.py"
+alias cdaudio="cd /root/record_audio"
+alias vimtodovideo="vimtodo video"
+alias vimtodoerc="vimtodo erc"
+alias vimmultialias="vim /root/vast-utils/multi_alias.sh;source /root/vast-utils/multi_alias.sh"
+source /root/vast-utils/multi_alias.sh
+alias vimsummarizedeletion="vim /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/summarize_deletion.py"
+alias tryselectdeletion="cdelp;pythond2 examples/select_results.py --modelname vgg16 --methodnames IGOSpp extremal_perturbation multithresh_saliency scorecam groupcam grad_cam --dataset imagenet-5000 --anchor_method multithresh_saliency --anchor_state 1"
+function vimgenruntorchray(){
+    local jsonfname="$1"
+    vimrunjson "$jsonfname"
+    genrunscript "$jsonfname"
+    local runjsonfolder="/root/evaluate-saliency-4/elp_with_scales/run-scripts/run-jsons"
+    local shfname0=`python -c "import json;f = open(\"$runjsonfolder/$jsonfname\",'r');loaded = json.load(f);print('run_vast_' + loaded['instance_id'] + '.sh')"`
+    #local shfname="/root/evaluate-saliency-4/elp_with_scales/run-scripts/$shfname0"
+    runtorchray $shfname0
 }
-function createandcollectattributionimagesforpaper(){
-    createattributionimagesforpaper
-    collectimagesforpaper
-}
-alias cdcifarvgg="cd /root/evaluate-saliency-4/pytorch-vgg-cifar10/pytorch_vgg_cifar10"
-alias vimcifarvgg="cd /root/evaluate-saliency-4/pytorch-vgg-cifar10/pytorch_vgg_cifar10/vgg.py"
-function rmvisualization(){
-read -p "DANGEROUS!, removing /root/bigfiles/other/metrics-torchray/visualization (y/n)" flag
-if [[ "$flag" == "y" ]]; then
-    echo "deleting"
-    rm -rf /root/bigfiles/other/metrics-torchray/visualization 
-    history -d $(($HISTCMD-1))
-
-    fi
-
-
-    }
+complete -F __runjson_completion vimgenruntorchray
+#function newalias(){
+#
+#}

@@ -308,6 +308,7 @@ kill_tmux_sessions() {
 
 source /root/instance_info.sh
 alias pythond='python -m ipdb -c c'
+alias pythond2='python -m ipdb'
 bash $SCRIPT_DIR/start_services.sh
 echo "shortcuts.sh done"
 alias ..="cd ../"
