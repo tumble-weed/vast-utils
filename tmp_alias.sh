@@ -351,8 +351,15 @@ function checkallresultstorchray(){
 alias trycameras="python examples/attribution_benchmark.py --method CAMERAS --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
 function checkgit(){
     #set -e
-    dirs=("/root/evaluate-saliency-4/elp_with_scales" "/root/evaluate-saliency-4/cam-benchmark" "/root/vast-utils/" "/root/evaluate-saliency-4/dutils" "/root/evaluate-saliency-4/CAMERAS" "/root/evaluate-saliency-4/sess" "/root/evaluate-saliency-4/pytorch-vgg-cifar10" "/root/cifar10-fast-simple/")
+    local dummy_
+    dirs=("/root/evaluate-saliency-4/elp_with_scales" "/root/evaluate-saliency-4/cam-benchmark" "/root/vast-utils/" "/root/evaluate-saliency-4/dutils" "/root/evaluate-saliency-4/CAMERAS" "/root/evaluate-saliency-4/sess" "/root/evaluate-saliency-4/pytorch-vgg-cifar10" "/root/evaluate-saliency-4/cifar10-fast-simple/" "/root/evaluate-saliency-4/multithresh-saliency")
     for d in "${dirs[@]}"; do
+        if [ -d "$d" ]; then
+            :
+        else
+            read -p "$d does not exist!!!. press any key to comtinue" dummy_
+
+        fi
         tmux new-session -d -s t-git "cd $d; git s;bash"
         tma t-git
     done
@@ -754,24 +761,24 @@ alias vimtorchraymodels='vim /root/evaluate-saliency-4/elp_with_scales/torchray/
 function undo_e(){
     set +e
     }
-function runallimagenet(){
-    set -e
-    trap undo_e EXIT
-    trap undo_e ERR
-    dataset="imagenet-5000"
-    archs=("vgg16" "resnet50")
-    #methods=("grad_cam" "rise" "groupcam" "scorecam" "guided_backprop" "gradient" "SESS")
-    methods=("rise" "groupcam" "scorecam" "SESS")
-    use_compiled_model=false
-    curdir=`pwd`
-    cdelp
-    for arch in "${archs[@]}";do
-        for method in "${methods[@]}";do
-            python examples/attribution_benchmark.py --method $method --continue_ --arch $arch --dataset $dataset --save_detailed_results true --use_compiled_model ${use_compiled_model}
-        done
-    done
-    cd $curdir
-    }
+#function runallimagenet(){
+#    set -e
+#    trap undo_e EXIT
+#    trap undo_e ERR
+#    dataset="imagenet-5000"
+#    archs=("vgg16" "resnet50")
+#    #methods=("grad_cam" "rise" "groupcam" "scorecam" "guided_backprop" "gradient" "SESS")
+#    methods=("rise" "groupcam" "scorecam" "SESS")
+#    use_compiled_model=false
+#    curdir=`pwd`
+#    cdelp
+#    for arch in "${archs[@]}";do
+#        for method in "${methods[@]}";do
+#            python examples/attribution_benchmark.py --method $method --continue_ --arch $arch --dataset $dataset --save_detailed_results true --use_compiled_model ${use_compiled_model}
+#        done
+#    done
+#    cd $curdir
+#    }
 alias vimmultiwrapper="vim /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency/wrapper_for_torchray.py"
 alias vimtorchraydataset='vim /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark/datasets.py'
 function tmn2(){
@@ -785,6 +792,7 @@ function tmn2(){
     tmux a -t $name
 # attach to the back ground session ( i.e. bring it foreground)
     }
+alias vimplotdeletion="vim /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/plot_deletion.py"
 #ADDNEW
 function summarize_all_deletion(){
 local datasets=("cifar-10" "cifar-100" "mnist")
@@ -939,3 +947,66 @@ complete -F __runjson_completion vimgenruntorchray
 #function newalias(){
 #
 #}
+alias scratchbash="vim /tmp/dummy.sh && bash /tmp/dummy.sh"
+alias scratchpy="vim /tmp/dummy.py && python -m ipdb -c c /tmp/dummy.py"
+
+function summarizedeletion(){
+    trap "set +x" EXIT
+    trap "set +x" ERR
+    set -x
+    curdir=`pwd`
+    cdelp
+    if [ -v method ] && [ -v arch ]  && [ -v dataset ];then
+        :
+    else
+        echo "variables not set"
+        return 1
+        fi
+    cmd="python torchray/helpers/summarize_deletion.py --method $method --arch $arch --dataset $dataset"
+    #echo $cmd
+    eval $cmd
+    cd $curdir
+}
+
+function summarizedeletionforarch(){
+    #arch="$1"
+    if [ -v arch ]; then
+        :
+    else
+        echo "variables not set"
+        return 1
+        fi
+    methods=("integrated_gradients" "gradient" "grad_cam")
+    datasets=("cifar-10" "cifar-100" "mnist")
+    for method in "${methods[@]}"; do
+        for dataset in "${datasets[@]}"; do
+            cmd="method=$method arch=$arch dataset=$dataset summarizedeletion"
+            echo "$cmd"
+            eval $cmd
+        done
+    done
+
+}
+function summarizealldeletion() {
+    arch=resnet8 summarizedeletionforarch
+    arch=vgg16 summarizedeletionforarch
+}
+function plotdeletion(){
+    trap "cd $curdir" EXIT
+    trap "cd $curdir" ERR
+    cdelp
+    cmd="python torchray/helpers/plot_deletion.py --arch $arch --dataset $dataset"
+    echo "$cmd"
+    #eval "$cmd"
+}
+function plotalldeletion() {
+    archs=("vgg16" "resnet8")
+    datsets=("cifar-10" "cifar-100" "mnist")
+    for arch in "${archs[@]}";do
+        for dataset in "${datasets[@]}";do
+           cmd=" dataset=$dataset arch=$arch plotdeletion"
+           echo "$cmd"
+           eval "$cmd"
+        done
+    done
+}
