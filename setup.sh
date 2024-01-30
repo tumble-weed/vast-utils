@@ -3,7 +3,12 @@ set -x
 touch ~/.no_auto_tmux
 bash install_rsync.sh
 # Get the directory of the currently executing script
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if false;then
+    DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+else
+    DIR="/root/vast-utils"
+fi
+
 echo $DIR
 # Add the source line to .bashrc if it's not already present
 #if ! grep -q "source $DIR/shortcuts.sh" ~/.bashrc; then
