@@ -1,3 +1,4 @@
+set -a
 if [[ "$0" == "-bash" || "$0" == "-sh" || "$0" == "bash" ]]; then
   SCRIPT_DIR=$(dirname "${BASH_SOURCE}")
 else
@@ -483,4 +484,10 @@ findbash(){
         grep -H "$target" -- "$file"
       fi
     done
+}
+alias rless="less -r"
+alias gitaignore="git add .gitignore"
+function editncommitgitignore(){
+    local msg="$1"
+    vim .gitignore && git add .gitignore && git cpp "$msg"
 }

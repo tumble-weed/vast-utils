@@ -1,3 +1,4 @@
+set -a
 #alias runsess="cd $ELP; DBG_SESS=1 CUDA_VISIBLE_DEVICES=, python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation_with_sess_scale_and_crop --start 0 --end 5000 --continue_ --arch vgg16 --dataset voc_2007"
 alias dbgsess="cd $ELP; DBG_SESS=1 CUDA_VISIBLE_DEVICES=, python -m ipdb -c c examples/attribution_benchmark.py --method SESS --start 0 --end 5000  --arch vgg16 --dataset voc_2007"
 alias s115="ssh vast-115"
@@ -594,7 +595,6 @@ function runsmaller() {
     #guided_backprop
     #gradient
     #"""
-    methods=("integrated_gradients" "grad_cam" "guided_backprop" "gradient" "multithresh_saliency")
     #methods=("integrated_gradients")
     #methods=("grad_cam" "guided_backprop" "gradient")
     save_detailed_results="true"
@@ -602,6 +602,13 @@ function runsmaller() {
     arch="$1"
     #dataset="cifar-10"
     dataset="$2"
+    methods=("integrated_gradients" "grad_cam" "guided_backprop" "gradient" "multithresh_saliency")
+    method="${3}"
+    if [ "$method" == "" ];then
+       :
+    else
+        methods=("$method") 
+    fi
     #..............................................
     continue_=""
     if [ -v CONTINUE ] && [ $CONTINUE == true ]; then
@@ -617,12 +624,21 @@ function runsmaller() {
     fi
     echo "$dry_run"
     #..............................................
-    base_command="python examples/attribution_benchmark.py --arch ${arch} --dataset ${dataset} --save_detailed_results ${save_detailed_results} ${dry_run} --metrics deletion_game $continue_"
+    PYTHON="python"
+    if [ -v DEBUG ] && [ "$DEBUG" == true ]; then
+        PYTHON="python -m ipdb -c c"
+    fi
+    base_command="$PYTHON examples/attribution_benchmark.py --arch ${arch} --dataset ${dataset} --save_detailed_results ${save_detailed_results} ${dry_run} --metrics deletion_game $continue_"
     for method in "${methods[@]}";do
         full_command="$base_command --method $method"
         #echo "Im executing ${full_command}"
         cdelp
         #output=`$full_command`
+        if [ -v IGNORE_METHOD ] && [ "$method" == "$IGNORE_METHOD" ]; then
+            continue
+            #return 1
+        fi
+
         echo ${full_command}
         $full_command
         #&& cdresults && bash
@@ -630,24 +646,26 @@ function runsmaller() {
     #set +x
     }
 function runallsmaller() {
-    """
-    archs: resnet8, vgg16
-    datasets: cifar-10,cifar-100,mnist
-    """
+    #"""
+    #archs: resnet8, vgg16
+    #datasets: cifar-10,cifar-100,mnist
+    #"""
+    # IGNORE_METHOD=multithresh_saliency runallsmaller vgg16 mnist
     set -u
-    trap "set +u" EXIT
-    trap "set +u" ERR
-#    python -c """
-#import argparse
-#parser = argparse.ArgumentParser()
-#parser.add_argument('--archs'
-#argparse.parse_args()
-#"""
-    local archs="${1:-("resnet8")}"
+    #set -x
+    trap "set +u;set +x" EXIT
+    trap "set +u;set +x" ERR
+
+    local archs="${1:-(resnet8)}"
     #shift
     #archs=("resnet8")
     #local datasets=("cifar-10" "cifar-100" "mnist")
-    local datasets=("cifar-100" "mnist"  "cifar-10")
+    #local default_datasets=("cifar-10")
+    local default_datasets=("cifar-10" "cifar-100" "mnist")
+    local datasets="${2}" 
+    if [ $datasets == "" ]; then
+        datasets=("${default_datasets[@]}")
+    fi
     #local archs=("resnet8" "vgg16")
     #local dry_run="--start 1000 --end 1004"
     local CONTINUE=${CONTINUE:-true}
@@ -657,7 +675,7 @@ function runallsmaller() {
             #echo "Processing: Arch=$i, Dataset=$j"
             cmd="runsmaller $arch $dataset"
             echo "$cmd"
-            ${cmd}
+            eval "$cmd"
         done
     done
     #set +u
@@ -793,23 +811,220 @@ function tmn2(){
 # attach to the back ground session ( i.e. bring it foreground)
     }
 alias vimplotdeletion="vim /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/plot_deletion.py"
-#ADDNEW
 function summarize_all_deletion(){
-local datasets=("cifar-10" "cifar-100" "mnist")
-local methods=("integrated_gradients" "grad_cam" "guided_backprop" "gradient")
-local archs=("resnet8" "vgg16")
-for dataset in "${datasets[@]}"
-do
-    for method in "${methods[@]}"
+    local datasets=("cifar-10" "cifar-100" "mnist")
+    if [ -v DATASET ]; then
+       datasets=("$DATASET")
+    fi
+    #local methods=("integrated_gradients" "grad_cam" "guided_backprop" "gradient")
+    local methods=("${methodnames_for_smaller_multi_paper[@]}")
+    if [ -v METHOD ]; then
+       methods=("$METHOD")
+    fi
+    local archs=("resnet8" "vgg16")
+    if [ -v ARCH ]; then
+       archs=("$ARCH")
+    fi
+    for dataset in "${datasets[@]}"
     do
-        for arch in "${archs[@]}"
+        for method in "${methods[@]}"
         do
-            python summarize_deletion.py --method "${method}" --arch "${arch}" --dataset "${dataset}"
-            return 0
+             if [ -v IGNORE_METHOD ] && [ "$IGNORE_METHOD" == "$method" ]; then
+                 continue
+             fi
+           
+            for arch in "${archs[@]}"
+            do
+                if [ -v IGNORE_ARCH ] && [ "$IGNORE_ARCH" == "$arch" ]; then
+                     continue
+                fi
+                python /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/summarize_deletion.py  --method "${method}" --arch "${arch}" --dataset "${dataset}"
+                #return 0
+            done
         done
     done
-done
 }
+function remember(){
+    set -x
+    cmd="$*"
+    if [ "$cmd" == '-l' ] || [  "$cmd" == '--last' ];then
+        lastcmd="`history | tail -n 2 | head -n 1`"
+        echo "$lastcmd" >> /root/myhistory/history_
+    elif [ "${cmd:0:2}" == '-m' ] ; then
+        echo "-m"
+        echo "$cmd"
+        lastcmd="${cmd:3}"
+        echo "$lastcmd" >> /root/myhistory/history_
+    else
+        echo "$cmd" >> /root/myhistory/history_
+        eval "$cmd"
+    fi
+    set +x
+}
+function myhistory(){
+    vim /root/myhistory/history_
+}
+alias vimdebugmulti="vim /root/debug-multi"
+multi="/root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency/multithresh_saliency_.py"
+alias vimmulti="vim /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency/multithresh_saliency_.py"
+alias vimelpmasking="vim /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency/elp_masking.py"
+alias vimtorchrayutils="vim /root/evaluate-saliency-4/elp_with_scales/torchray/utils.py"
+igosppwrapper="/root/evaluate-saliency-4/elp_with_scales/torchray/wrappers_for_torchray/IGOSpp_wrapper.py"
+alias vimigosppwrapper="vim $igosppwrapper"
+sesswrapper="/root/evaluate-saliency-4/elp_with_scales/torchray/wrappers_for_torchray/SESS_wrapper.py"
+alias vimsesswrapper="vim $sesswrapper"
+alias cdigospp="cd /root/evaluate-saliency-4/IGOS_pp/IGOS_pp"
+alias vimigospp="vim /root/evaluate-saliency-4/IGOS_pp/IGOS_pp/methods.py"
+alias cdaudio="cd /root/record_audio"
+alias vimtodovideo="vimtodo video"
+alias vimtodoerc="vimtodo erc"
+alias vimmultialias="vim /root/vast-utils/multi_alias.sh;source /root/vast-utils/multi_alias.sh"
+source /root/vast-utils/multi_alias.sh
+alias vimsummarizedeletion="vim /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/summarize_deletion.py"
+alias tryselectdeletion="cdelp;pythond2 examples/select_results.py --modelname vgg16 --methodnames IGOSpp extremal_perturbation multithresh_saliency scorecam groupcam grad_cam --dataset imagenet-5000 --anchor_method multithresh_saliency --anchor_state 1"
+function vimgenruntorchray(){
+    local jsonfname="$1"
+    vimrunjson "$jsonfname"
+    genrunscript "$jsonfname"
+    local runjsonfolder="/root/evaluate-saliency-4/elp_with_scales/run-scripts/run-jsons"
+    local shfname0=`python -c "import json;f = open(\"$runjsonfolder/$jsonfname\",'r');loaded = json.load(f);print('run_vast_' + loaded['instance_id'] + '.sh')"`
+    #local shfname="/root/evaluate-saliency-4/elp_with_scales/run-scripts/$shfname0"
+    runtorchray $shfname0
+}
+complete -F __runjson_completion vimgenruntorchray
+#function newalias(){
+#
+#}
+alias scratchbash="vim /tmp/dummy.sh && bash /tmp/dummy.sh"
+alias scratchbash2="vim /tmp/dummy.sh && source /tmp/dummy.sh"
+alias scratchpy="vim /tmp/dummy.py && python -m ipdb -c c /tmp/dummy.py"
+
+function summarizedeletion(){
+    trap "set +x" EXIT
+    trap "set +x" ERR
+    set -x
+    curdir=`pwd`
+    cdelp
+    if [ -v method ] && [ -v arch ]  && [ -v dataset ];then
+        :
+    else
+        echo "variables not set"
+        return 1
+        fi
+    cmd="python torchray/helpers/summarize_deletion.py --method $method --arch $arch --dataset $dataset"
+    #echo $cmd
+    eval $cmd
+    cd $curdir
+}
+
+function summarizedeletionforarch(){
+    #arch="$1"
+    if [ -v arch ]; then
+        :
+    else
+        echo "variables not set"
+        return 1
+        fi
+    methods=("integrated_gradients" "gradient" "grad_cam")
+    datasets=("cifar-10" "cifar-100" "mnist")
+    for method in "${methods[@]}"; do
+        for dataset in "${datasets[@]}"; do
+            cmd="method=$method arch=$arch dataset=$dataset summarizedeletion"
+            echo "$cmd"
+            eval $cmd
+        done
+    done
+
+}
+function summarizealldeletion() {
+    arch=resnet8 summarizedeletionforarch
+    arch=vgg16 summarizedeletionforarch
+}
+function plotdeletion(){
+    trap "cd $curdir" EXIT
+    trap "cd $curdir" ERR
+    cdelp
+    cmd="python torchray/helpers/plot_deletion.py --arch $arch --dataset $dataset"
+    echo "$cmd"
+    #eval "$cmd"
+}
+function plotalldeletion() {
+    archs=("vgg16" "resnet8")
+    datsets=("cifar-10" "cifar-100" "mnist")
+    for arch in "${archs[@]}";do
+        for dataset in "${datasets[@]}";do
+           cmd=" dataset=$dataset arch=$arch plotdeletion"
+           echo "$cmd"
+           eval "$cmd"
+        done
+    done
+}
+comparemasking="/root/evaluate-saliency-4/elp_with_scales/scripts/compare_igos_multi_masking.py"
+export alias vimcomparemasking="vim /root/evaluate-saliency-4/elp_with_scales/scripts/compare_igos_multi_masking.py"
+#alias visualizemultiimagenetvgg16="cdelp;DBG_MULTIWRAPPER= pythond examples/attribution_benchmark.py --method multithresh_saliency --arch vgg16 --dataset cifar-100 --metrics deletion_game --save_detailed_results true"
+alias workoncomparemasking="while true;do vim -O $multi -O $comparemasking && cdparent $comparemasking && python $comparemasking &&cd -;done"
+
+methodnames_for_imagenet_multi_paper=("scorecam" "grad_cam" "groupcam" "IGOSpp" "extremal_perturbation" "multithresh_saliency")
+methodnames_for_smaller_multi_paper=("gradient" "guided_backprop" "grad_cam" "integrated_gradients" "multithresh_saliency")
+archs_for_imagenet_multi_paper=("vgg16" "resnet50")
+archs_for_smaller_multi_paper=("vgg16" "resnet8")
+smaller_datasets_for_multi_paper=("cifar-10" "cifar-100" "mnist")
+function getmethodnamesmultipaper(){
+    echo "methods for imagenet ${methodnames_for_imagenet_multi_paper[@]}"
+    echo "archs for imagenet ${archs_for_imagenet_multi_paper[@]}"
+    echo "methods for smaller ${methodnames_for_smaller_multi_paper[@]}"
+    echo "archs for smaller ${archs_for_smaller_multi_paper[@]}"
+}
+function check_ndone_imagenet_multi(){
+    methodnames=("${methodnames_for_imagenet_multi_paper[@]}")
+    archs=("${archs_for_imagenet_multi_paper[@]}")
+    dataset="imagenet-5000"
+    for arch in "${archs[@]}";do
+        for method in "${methodnames[@]}"; do
+            #echo $method $arch
+            check_ndone $method $arch $dataset
+            done
+    done
+}
+function check_ndone_smaller_multi(){
+    datasets=("${smaller_datasets_for_multi_paper[@]}")
+    methodnames=("${methodnames_for_smaller_multi_paper[@]}")
+    archs=("${archs_for_smaller_multi_paper[@]}")
+    for arch in "${archs[@]}";do
+        for dataset in "${datasets[@]}"; do
+            for method in "${methodnames[@]}"; do
+                if [ $dataset == "cifar-10" ]; then
+                    dataset="${dataset}-"
+                    fi
+                method="${method}-"
+                #echo $method $arch
+                check_ndone $method $arch $dataset
+                #return 1
+            done
+            echo "================================================================"
+        done
+    done
+}
+alias vimgradientnan="vim +276 /root/evaluate-saliency-4/elp_with_scales/torchray/attribution/common.py"
+alias vimfastapi="vim /root/fastapi-topics/topics"
+function collectdeletion(){
+    echo "hi"
+    local arch="${1:-resnet8}"
+    local dataset="${2:-mnist}"
+    cmd="python -m ipdb -c c $ELP/scripts/collect_deletion.py --arch $arch --dataset $dataset"
+    echo $cmd
+    eval "$cmd"
+
+}
+function runsummarizecollectdeletion(){
+summarize_all_deletion
+collectdeletion
+}
+alias workoncollectdeletion="vim  -O $ELP/scripts/collect_deletion.py -O /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/plot_deletion.py;collectdeletion"
+function addtodo2(){
+    echo "$*" >> /root/todo2/todo2
+}
+#ADDNEW
 function vimallrun(){
     local curdir=`pwd`
     cdrunscripts
@@ -917,96 +1132,4 @@ function visualizeforpaper(){
     collectimagesforpaper
     set +x
 }
-alias vimdebugmulti="vim /root/debug-multi"
-alias vimmulti="vim /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency/multithresh_saliency_.py"
-alias vimelpmasking="vim /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency/elp_masking.py"
-alias vimtorchrayutils="vim /root/evaluate-saliency-4/elp_with_scales/torchray/utils.py"
-igosppwrapper="/root/evaluate-saliency-4/elp_with_scales/torchray/wrappers_for_torchray/IGOSpp_wrapper.py"
-alias vimigosppwrapper="vim $igosppwrapper"
-sesswrapper="/root/evaluate-saliency-4/elp_with_scales/torchray/wrappers_for_torchray/SESS_wrapper.py"
-alias vimsesswrapper="vim $sesswrapper"
-alias cdigospp="cd /root/evaluate-saliency-4/IGOS_pp/IGOS_pp"
-alias vimigospp="vim /root/evaluate-saliency-4/IGOS_pp/IGOS_pp/methods.py"
-alias cdaudio="cd /root/record_audio"
-alias vimtodovideo="vimtodo video"
-alias vimtodoerc="vimtodo erc"
-alias vimmultialias="vim /root/vast-utils/multi_alias.sh;source /root/vast-utils/multi_alias.sh"
-source /root/vast-utils/multi_alias.sh
-alias vimsummarizedeletion="vim /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/summarize_deletion.py"
-alias tryselectdeletion="cdelp;pythond2 examples/select_results.py --modelname vgg16 --methodnames IGOSpp extremal_perturbation multithresh_saliency scorecam groupcam grad_cam --dataset imagenet-5000 --anchor_method multithresh_saliency --anchor_state 1"
-function vimgenruntorchray(){
-    local jsonfname="$1"
-    vimrunjson "$jsonfname"
-    genrunscript "$jsonfname"
-    local runjsonfolder="/root/evaluate-saliency-4/elp_with_scales/run-scripts/run-jsons"
-    local shfname0=`python -c "import json;f = open(\"$runjsonfolder/$jsonfname\",'r');loaded = json.load(f);print('run_vast_' + loaded['instance_id'] + '.sh')"`
-    #local shfname="/root/evaluate-saliency-4/elp_with_scales/run-scripts/$shfname0"
-    runtorchray $shfname0
-}
-complete -F __runjson_completion vimgenruntorchray
-#function newalias(){
-#
-#}
-alias scratchbash="vim /tmp/dummy.sh && bash /tmp/dummy.sh"
-alias scratchpy="vim /tmp/dummy.py && python -m ipdb -c c /tmp/dummy.py"
 
-function summarizedeletion(){
-    trap "set +x" EXIT
-    trap "set +x" ERR
-    set -x
-    curdir=`pwd`
-    cdelp
-    if [ -v method ] && [ -v arch ]  && [ -v dataset ];then
-        :
-    else
-        echo "variables not set"
-        return 1
-        fi
-    cmd="python torchray/helpers/summarize_deletion.py --method $method --arch $arch --dataset $dataset"
-    #echo $cmd
-    eval $cmd
-    cd $curdir
-}
-
-function summarizedeletionforarch(){
-    #arch="$1"
-    if [ -v arch ]; then
-        :
-    else
-        echo "variables not set"
-        return 1
-        fi
-    methods=("integrated_gradients" "gradient" "grad_cam")
-    datasets=("cifar-10" "cifar-100" "mnist")
-    for method in "${methods[@]}"; do
-        for dataset in "${datasets[@]}"; do
-            cmd="method=$method arch=$arch dataset=$dataset summarizedeletion"
-            echo "$cmd"
-            eval $cmd
-        done
-    done
-
-}
-function summarizealldeletion() {
-    arch=resnet8 summarizedeletionforarch
-    arch=vgg16 summarizedeletionforarch
-}
-function plotdeletion(){
-    trap "cd $curdir" EXIT
-    trap "cd $curdir" ERR
-    cdelp
-    cmd="python torchray/helpers/plot_deletion.py --arch $arch --dataset $dataset"
-    echo "$cmd"
-    #eval "$cmd"
-}
-function plotalldeletion() {
-    archs=("vgg16" "resnet8")
-    datsets=("cifar-10" "cifar-100" "mnist")
-    for arch in "${archs[@]}";do
-        for dataset in "${datasets[@]}";do
-           cmd=" dataset=$dataset arch=$arch plotdeletion"
-           echo "$cmd"
-           eval "$cmd"
-        done
-    done
-}
