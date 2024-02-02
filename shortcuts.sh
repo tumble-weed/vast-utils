@@ -394,6 +394,10 @@ function vimtodo2(){
     set-title $old_title
     #set +e
     }
+function addtodo2(){
+    msg="$*"
+    echo "$msg" >> /root/todo2/todo2
+    }
 alias vimtodo2ps="vimtodo2 ps"
 alias vimtodops="vimtodo2 ps"
 alias vimtodo2psych="vimtodo2 ps"

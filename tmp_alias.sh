@@ -585,7 +585,7 @@ alias trymnist="cdelp;DBG_GRADCAM=1 python -m ipdb -c c examples/attribution_ben
 #    set +x
 #}
 function runsmaller() {
-    set -u
+    #set -u
     trap "set +u" EXIT
     trap "set +u" ERR
     #set -x
@@ -628,7 +628,7 @@ function runsmaller() {
     if [ -v DEBUG ] && [ "$DEBUG" == true ]; then
         PYTHON="python -m ipdb -c c"
     fi
-    base_command="$PYTHON examples/attribution_benchmark.py --arch ${arch} --dataset ${dataset} --save_detailed_results ${save_detailed_results} ${dry_run} --metrics deletion_game $continue_"
+    base_command="DBG_LANDATALOADER=$DBG_LANDATALOADER $PYTHON examples/attribution_benchmark.py --arch ${arch} --dataset ${dataset} --save_detailed_results ${save_detailed_results} ${dry_run} --metrics deletion_game $continue_"
     for method in "${methods[@]}";do
         full_command="$base_command --method $method"
         #echo "Im executing ${full_command}"
@@ -640,7 +640,7 @@ function runsmaller() {
         fi
 
         echo ${full_command}
-        $full_command
+        eval "$full_command"
         #&& cdresults && bash
     done
     #set +x
@@ -986,10 +986,20 @@ function check_ndone_imagenet_multi(){
             done
     done
 }
+#METHODNAME=multithresh_saliency check_ndone_smaller_multi
 function check_ndone_smaller_multi(){
     datasets=("${smaller_datasets_for_multi_paper[@]}")
+    if [ -v DATASET ]; then
+        datasets=("$DATASET")
+    fi
     methodnames=("${methodnames_for_smaller_multi_paper[@]}")
+    if [ -v METHODNAME ]; then
+        methodnames=("$METHODNAME")
+    fi
     archs=("${archs_for_smaller_multi_paper[@]}")
+    if [ -v ARCH ]; then
+        archs=("$ARCH")
+    fi
     for arch in "${archs[@]}";do
         for dataset in "${datasets[@]}"; do
             for method in "${methodnames[@]}"; do
@@ -1022,7 +1032,126 @@ collectdeletion
 }
 alias workoncollectdeletion="vim  -O $ELP/scripts/collect_deletion.py -O /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/plot_deletion.py;collectdeletion"
 function addtodo2(){
-    echo "$*" >> /root/todo2/todo2
+    local msg="$*"
+    local payload='1s/^/'
+    payload+="$msg"
+    payload+='\n/'
+    #local fname="/root/todo2/todo2_bkup"
+    local fname="/root/todo2/todo2"
+    echo $payload
+    sed -i "$payload" $fname
+
+}
+function setup_smaller_vgg16(){
+cdrunjson 
+#cp run_imagenet_vgg16.json run_multi_cifar10_vgg16.json &&\ 
+vim run_multi_cifar10_vgg16.json 
+genrunscript run_multi_cifar10_vgg16.json
+#cp run_multi_cifar10_vgg16.json run_multi_cifar100_vgg16.json &&\ 
+vim run_multi_cifar100_vgg16.json 
+genrunscript run_multi_cifar100_vgg16.json 
+#cp run_multi_cifar10_vgg16.json run_multi_mnist_vgg16.json &&\ 
+vim run_multi_mnist_vgg16.json 
+genrunscript run_multi_mnist_vgg16.json
+
+}
+alias run_smaller_vgg16="runtorchray run_vast_multi_cifar-10_vgg16.sh && runtorchray run_vast_multi_cifar-100_vgg16.sh && runtorchray run_vast_multi_mnist_vgg16.sh"
+alias workonsmallerfilelist="vim -O /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/summary2.py"
+function createsmallerfileorder() {
+    local arch="resnet8"
+    local method="grad_cam"
+    local datasets=("${smaller_datasets_for_multi_paper[@]}")
+    for dataset in "${datasets[@]}"; do
+        python /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/summary2.py --create_file_order true --arch $arch --dataset $dataset --method $method
+    done
+}
+#alias workondataloader="vim -O /tmp/dataclient.py -O /tmp/dataserver.py && tmux kill-session -t 't-dl' ; tmux new -session -d -s 't-dl' 'cd /tmp; uvicorn dataserver:app --reload --host 0.0.0.0 --port 14000;bash' && tmux a -t 't-dl' && cd /tmp && python dataclient.py && cd -"
+"""
+    dataset = 'cifar-10'
+    method = 'multithresh_saliency'
+    arch = 'vgg16'
+    port = 14000
+    runsmaler vgg16 cifar-10 multithresh_saliency
+"""
+alias workondataloaderlocal="vim -O $ELP/torchray/helpers/dataclient.py -O /root/evaluate-saliency-4/elp_with_scales/examples/attribution_benchmark.py -O /root/evaluate-saliency-4/elp_with_scales/examples/attribution_benchmark.py && set-title elp && DBG_LANDATALOADER=1 DRY_RUN=false CONTINUE=false runsmaller vgg16 cifar-10 multithresh_saliency"
+alias vimdataloaderserver="vim -O $ELP/torchray/helpers/dataclient.py -O $ELP/torchray/helpers/dataserver.py -O /root/evaluate-saliency-4/elp_with_scales/examples/attribution_benchmark.py"
+alias workondataloaderclient="set-title elp && DBG_LANDATALOADER=1 DRY_RUN=false CONTINUE=false runsmaller vgg16 cifar-10 multithresh_saliency"
+alias ssh113="ssh vast-113"
+alias check_ndone_smaller_vgg16="ARCH=vgg16 METHODNAME=multithresh_saliency check_ndone_smaller_multi" 
+alias vimcollectdeletion="vim $ELP/scripts/collect_deletion.py"
+TORCHRAYMETRICS="/root/bigfiles/other/metrics-torchray"
+workonvalidatevgg16(){
+    echo """
+. open the cdcifarvgg main.py file
+. copy the entire code to validation.py file
+. add the methodname etc to the validation file
+. remove the training stp, train_loader etc part of the code
+. use as many functions from main.py as possible
+"""
+    cdcifarvgg
+    trap "cd -" EXIT
+    trap "cd -" ERR
+    vim -O main.py -O validation.py
+    results_file=$TORCHRAYMETRICS/vgg16_performance
+    echo "" > $results_file
+    datasets=("cifar-10" "cifar-100" "mnist")
+    for dataset in "${datasets[@]}";do
+        python   main.py --evaluate --dataset $dataset --arch vgg16 >> $results_file
+    done
+
+}
+function workonvalidateresnet8(){
+    echo """
+. open the cdcifarvgg main.py file
+. copy the entire code to validation.py file
+. add the methodname etc to the validation file
+. remove the training stp, train_loader etc part of the code
+. use as many functions from main.py as possible
+"""
+    cdcifar
+    #set -x
+    trap "set +x;cd -" EXIT
+    trap "set +x;cd -" ERR
+    ls
+    #vim -O main.py -O validation.py
+    vim train.py
+    results_file=$TORCHRAYMETRICS/resnet8_performance
+    echo "" > $results_file
+    datasets=("cifar-10" "cifar-100" "mnist")
+    for dataset in "${datasets[@]}";do
+        #python   train.py --evaluate --dataset $dataset --arch vgg16 >> $results_file
+        python train.py --dataset ${dataset} --evaluate true --use_tta false >> $results_file
+        echo "$dataset"
+    echo ${results_file}
+    done
+}
+function workondeletionlargedataset(){
+echo """
+. use scratchpy
+. get the path for 1 saved result: /root/bigfiles/other/results-torchray/imagenet-5000-grad_cam-resnet50/ILSVRC2012_val_00000100/bighorn349.xz
+. get the path for 1 saved result for a smaller model: /root/bigfiles/other/results-torchray/mnist-grad_cam-resnet8/0/77.xz
+. load the result
+. run_deletion file?
+. modify the loaded result to save the deletion game results
+. ensure the result for larger dataset is similar to that of smaller model
+"""
+#scratchpy
+#vim -O /tmp/dummy.py -O $ELP/torchray/benchmark/deletion_game.py
+#python /tmp/dummy.py
+vim /root/evaluate-saliency-4/cam-benchmark/cam_benchmark/deletion.py
+cdcam
+trap "cd -" EXIT
+trap "cd -" ERR
+methods=("${methodnames_for_imagenet_multi_paper[@]}")
+archs=("${archs_for_imagenet_multi_paper[@]}")
+for method in "${methods[@]}";do
+    for arch in "${archs[@]}";do
+    cmd="python deletion.py --method $method --arch $arch --dataset imagenet-5000 --ratios 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0"
+    echo $cmd
+    eval $cmd
+done
+done
+
 }
 #ADDNEW
 function vimallrun(){
