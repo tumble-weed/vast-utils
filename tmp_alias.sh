@@ -584,6 +584,12 @@ alias trymnist="cdelp;DBG_GRADCAM=1 python -m ipdb -c c examples/attribution_ben
 #    done
 #    set +x
 #}
+runallsmaller2(){
+    runsmaller vgg16 cifar-10 multithresh_saliency
+    runsmaller vgg16 cifar-100 multithresh_saliency
+    runsmaller vgg16 mnist multithresh_saliency
+    }
+alias clear2="echo -e \"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\""
 function runsmaller() {
     #set -u
     trap "set +u" EXIT
@@ -651,7 +657,7 @@ function runallsmaller() {
     #datasets: cifar-10,cifar-100,mnist
     #"""
     # IGNORE_METHOD=multithresh_saliency runallsmaller vgg16 mnist
-    set -u
+    #set -u
     #set -x
     trap "set +u;set +x" EXIT
     trap "set +u;set +x" ERR
@@ -811,17 +817,23 @@ function tmn2(){
 # attach to the back ground session ( i.e. bring it foreground)
     }
 alias vimplotdeletion="vim /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/plot_deletion.py"
-function summarize_all_deletion(){
-    local datasets=("cifar-10" "cifar-100" "mnist")
+function summarize_all_deletion_small(){
+    if [ -v datasets ];then
+        local datasets=("cifar-10" "cifar-100" "mnist")
+    fi
     if [ -v DATASET ]; then
        datasets=("$DATASET")
     fi
     #local methods=("integrated_gradients" "grad_cam" "guided_backprop" "gradient")
-    local methods=("${methodnames_for_smaller_multi_paper[@]}")
+    if [ -v methods ]; then
+        local methods=("${methodnames_for_smaller_multi_paper[@]}")
+    fi
     if [ -v METHOD ]; then
        methods=("$METHOD")
     fi
-    local archs=("resnet8" "vgg16")
+    if [ -v archs ]; then
+        local archs=("resnet8" "vgg16")
+    fi
     if [ -v ARCH ]; then
        archs=("$ARCH")
     fi
@@ -838,11 +850,20 @@ function summarize_all_deletion(){
                 if [ -v IGNORE_ARCH ] && [ "$IGNORE_ARCH" == "$arch" ]; then
                      continue
                 fi
-                python /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/summarize_deletion.py  --method "${method}" --arch "${arch}" --dataset "${dataset}"
+                cmd="python /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/summarize_deletion.py  --method ${method} --arch ${arch} --dataset ${dataset}"
+                echo "$cmd"
+                eval "$cmd"
                 #return 0
             done
         done
     done
+}
+function summarize_all_deletion_large(){
+    local datasets=("imagenet-5000")
+    local archs=("resnet8" "vgg16")
+    local methods=("${methodnames_for_imagenet_multi_paper[@]}")
+    summarize_all_deletion_small
+
 }
 function remember(){
     set -x
@@ -1034,7 +1055,7 @@ alias workoncollectdeletion="vim  -O $ELP/scripts/collect_deletion.py -O /root/e
 function addtodo2(){
     local msg="$*"
     local payload='1s/^/'
-    payload+="$msg"
+    payload+="-$msg"
     payload+='\n/'
     #local fname="/root/todo2/todo2_bkup"
     local fname="/root/todo2/todo2"
@@ -1147,12 +1168,31 @@ archs=("${archs_for_imagenet_multi_paper[@]}")
 for method in "${methods[@]}";do
     for arch in "${archs[@]}";do
     cmd="python deletion.py --method $method --arch $arch --dataset imagenet-5000 --ratios 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0"
-    echo $cmd
-    eval $cmd
+    #echo $cmd
+    if [ "$method" == "scorecam" ]; then
+        :
+    else
+        eval "$cmd"
+    fi
+    collectcommand="python deletion.py --add-to-results-xz true --method $method --arch $arch --dataset imagenet-5000"
+    echo "$collectcommand"
+    eval "$collectcommand"
+    return 0
 done
 done
 
 }
+alias cdmultipaper="cd /root/evaluate-saliency-4/ICIP-Multithreshold-saliency/"
+workonselfsaliency(){
+curdir=`pwd`
+trap "cd $curdir" EXIT
+trap "cd $curdir" ERR
+cdmulti
+#vim -O run_multithresh_saliency.py -O multithresh_saliency_.py -O run_self_saliency.py
+vim -O run_multithresh_saliency.py -O wrapper_for_torchray.py -O run_self_saliency.py
+python -m ipdb -c c run_multithresh_saliency.py
+}
+alias vimrunmulti="vim /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency/run_multithresh_saliency.py"
 #ADDNEW
 function vimallrun(){
     local curdir=`pwd`

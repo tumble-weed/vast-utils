@@ -394,10 +394,10 @@ function vimtodo2(){
     set-title $old_title
     #set +e
     }
-function addtodo2(){
-    msg="$*"
-    echo "$msg" >> /root/todo2/todo2
-    }
+#function addtodo2(){
+#    msg="$*"
+#    echo "$msg" >> /root/todo2/todo2
+#    }
 alias vimtodo2ps="vimtodo2 ps"
 alias vimtodops="vimtodo2 ps"
 alias vimtodo2psych="vimtodo2 ps"
@@ -408,6 +408,7 @@ alias vimtodo2job="vimtodo2 job"
 alias vimtodojob="vimtodo2 job"
 alias vimtodo2hiring="vimtodo2 hiring"
 alias vimtodohiring="vimtodo2 hiring"
+alias vimtodovideo="vimtodo video"
 
 alias vimssh="vim /root/.ssh/config"
 source /root/vast-utils/tmp_alias.sh
