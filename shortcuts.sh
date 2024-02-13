@@ -472,7 +472,7 @@ alias tmasummary="tma t-summary"
 #    name="$1"
 #    shopt -s extdebug; declare -Ff "$name"; shopt -u extdebug
 #}
-
+alias watchh="watch "
 findbash(){
   # https://askubuntu.com/a/1146283
   target="$@"
