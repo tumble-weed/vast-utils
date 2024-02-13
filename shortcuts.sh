@@ -473,6 +473,11 @@ alias tmasummary="tma t-summary"
 #    shopt -s extdebug; declare -Ff "$name"; shopt -u extdebug
 #}
 alias watchh="watch "
+# capture the output of a command so it can be retrieved with ret
+cap () { tee /tmp/capture.out; }
+
+# return the output of the most recent command that was captured by cap
+ret () { cat /tmp/capture.out; }#ADDNEW
 findbash(){
   # https://askubuntu.com/a/1146283
   target="$@"
@@ -496,3 +501,5 @@ function editncommitgitignore(){
     local msg="$1"
     vim .gitignore && git add .gitignore && git cpp "$msg"
 }
+
+
