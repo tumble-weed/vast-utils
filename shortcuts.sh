@@ -15,7 +15,7 @@ export VOCdevkitDIR=/root/bigfiles/dataset/VOCdevkit/
 CIFAR=/root/evaluate-saliency-4/GPNN_for_road/road_evaluation/experiments/cifar10
 INVERT=/root/evaluate-saliency-4/fong-invert/
 DI=$INVERT/DeepInversion
-MULTI=$INVERT/../dummy-multithresh
+MULTI=/root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency
 #alias cdmulti="cd $MULTI"
 alias cdmulti="set-title multi;cd /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency"
 STABLE=/root/evaluate-saliency-4/stable_diffusion
@@ -386,9 +386,9 @@ function vimtodo2(){
     fname="$1"
     echo $fname
     if [ -z "$fname" ];then
-       vim /root/todo2/todo2 
+       vim /root/todo2/todo2.dr
     else
-       vim /root/todo2/$fname
+       vim /root/todo2/${fname}.dr
     fi
     git a . && git c 'todo2' && git pu && cd -
     set-title $old_title
@@ -477,7 +477,8 @@ alias watchh="watch "
 cap () { tee /tmp/capture.out; }
 
 # return the output of the most recent command that was captured by cap
-ret () { cat /tmp/capture.out; }#ADDNEW
+ret () { cat /tmp/capture.out; }
+#ADDNEW
 findbash(){
   # https://askubuntu.com/a/1146283
   target="$@"

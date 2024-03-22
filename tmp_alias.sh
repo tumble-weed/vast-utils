@@ -1,5 +1,6 @@
-set -a
-alias cdresults2="cd /root/bigfiles/other/results-torchray2"
+#set -a
+results2=/root/bigfiles/other/results-torchray2
+alias cdresults2="cd ${results2}"
 workfeb6(){
 echo """
 - finish smaller with "both"
@@ -13,7 +14,7 @@ echo """
 #    add multithresh saliency to plot
 
 #- figure out why gradcam does not have saliency, was it run before? runall?
-#	- runscripts, runjson and imagenet grad_cam
+#   - runscripts, runjson and imagenet grad_cam
 # see if we can remove ticks 
 # see if self saliency directory is correct
 # see if self saliency panel directory is correct
@@ -25,7 +26,7 @@ echo """
     add multithresh saliency to plot
 """
 #- figure out why gradcam does not have saliency, was it run before? runall?
-#	- runscripts, runjson and imagenet grad_cam
+#   - runscripts, runjson and imagenet grad_cam
 # see if we can remove ticks 
 # see if self saliency directory is correct
 # see if self saliency panel directory is correct
@@ -168,7 +169,9 @@ function ssh2(){
     ssh -i /root/.ssh/shared_with_shubham $@
 }
 alias trysess="python examples/attribution_benchmark.py --method SESS --start 2000 --end 3000 --continue_ --arch resnet50 --dataset voc_2007 --save_detailed_results true"
-alias trycompile="TORCHDYNAMO_REPRO_AFTER=dynamo TORCHDYNAMO_REPRO_LEVEL=4 python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation   --end 100 --arch resnet50 --dataset voc_2007  --use_compiled_model true"
+#alias trygradcamcompile="TORCHDYNAMO_REPRO_AFTER=dynamo TORCHDYNAMO_REPRO_LEVEL=4 python -m ipdb -c c examples/attribution_benchmark.py --method extremal_perturbation   --end 100 --arch resnet50 --dataset voc_2007  --use_compiled_model true"
+alias tryscorecamcompile="cdelp; python -m ipdb -c c examples/attribution_benchmark.py --method scorecam  --arch vgg16 --dataset voc_2007  --use_compiled_model true --save_detailed_results true"
+alias tryrisecompile="cdelp; python -m ipdb -c c examples/attribution_benchmark.py --method rise  --arch vgg16 --dataset voc_2007  --use_compiled_model true --save_detailed_results true"
 alias cdbenchmark="cd /root/evaluate-saliency-4/elp_with_scales/torchray/benchmark"
 alias cdhelpers="cd /root/evaluate-saliency-4/elp_with_scales/torchray/helpers"
 alias vimresultshandler="vim /root/evaluate-saliency-4/elp_with_scales/torchray/results_data_handler.py"
@@ -334,7 +337,7 @@ function upload_bigfiles_other(){
     tmux kill-session t-rclone-bigfiles
     #tmux new-session -d -s t-rclone-bigfiles 'watch -n 10 bash -i -c "upload_bigfiles_other_"'
 
-    tmux uew-session -d -s t-rclone-bigfiles "bash -i -c \"upload_bigfiles_other_\""
+    tmux new-session -d -s t-rclone-bigfiles "bash -i -c \"upload_bigfiles_other_\""
     tmux a -t t-rclone-bigfiles
     }
 function upload_bigfiles_dataset_(){
@@ -350,10 +353,11 @@ function upload_bigfiles_dataset(){
     tmux new-session -d -s t-rclone-dataset "bash -i -c \"upload_bigfiles_dataset_\""
     tmux a -t t-rclone-dataset
     }
+
 function upload_all_gdrive(){
     upload_bigfiles_other
     upload_instance_to_gdrive
-    #upload_bigfiles_dataset
+    upload_bigfiles_dataset
 }
 alias vimworkflow="vim /root/evaluate-saliency-4/elp_with_scales/scripts/workflow.py"
 alias vim112="vim /root/evaluate-saliency-4/elp_with_scales/run-scripts/run_vast_112.sh"
@@ -643,34 +647,34 @@ alias trymnist="cdelp;DBG_GRADCAM=1 python -m ipdb -c c examples/attribution_ben
 #    done
 #    set +x
 #}
-mvsmallernew(){
-    echo "hi"
-}
-mvsmallerwindow5(){
-    cdresults2
-    local dirs=`ls -d *-multithresh_saliency_window_size5*/`
-    #echo "${dirs[@]}"
-    for d in ${dirs[@]}; do
-        local cmd="mv $d ../results-torchray/"
-        echo "---"
-        echo "$cmd"
-        eval "$cmd"
-    done
-    cd -
-}
-
-mvsmaller(){
-    echo "will move 800 epoch+insertion runs to another folder"
-#    cdresults
-#    mv cifar-10-multithresh_saliency-resnet8/ small_dataset_800_epoch_multithresh_saliency  
-#    mv cifar-10-multithresh_saliency-vgg16/ small_dataset_800_epoch_multithresh_saliency
-#    mv cifar-100-multithresh_saliency-resnet8/ small_dataset_800_epoch_multithresh_saliency
-#    mv cifar-100-multithresh_saliency-vgg16/ small_dataset_800_epoch_multithresh_saliency
-#    mv mnist-multithresh_saliency-resnet50/ small_dataset_800_epoch_multithresh_saliency
-#    mv mnist-multithresh_saliency-resnet8/ small_dataset_800_epoch_multithresh_saliency
-#    mv mnist-multithresh_saliency-vgg16/ small_dataset_800_epoch_multithresh_saliency
+#mvsmallernew(){
+#    echo "hi"
+#}
+#mvsmallerwindow5(){
+#    cdresults2
+#    local dirs=`ls -d *-multithresh_saliency_window_size5*/`
+#    #echo "${dirs[@]}"
+#    for d in ${dirs[@]}; do
+#        local cmd="mv $d ../results-torchray/"
+#        echo "---"
+#        echo "$cmd"
+#        eval "$cmd"
+#    done
 #    cd -
-}
+#}
+
+#mvsmaller(){
+#    echo "will move 800 epoch+insertion runs to another folder"
+##    cdresults
+##    mv cifar-10-multithresh_saliency-resnet8/ small_dataset_800_epoch_multithresh_saliency  
+##    mv cifar-10-multithresh_saliency-vgg16/ small_dataset_800_epoch_multithresh_saliency
+##    mv cifar-100-multithresh_saliency-resnet8/ small_dataset_800_epoch_multithresh_saliency
+##    mv cifar-100-multithresh_saliency-vgg16/ small_dataset_800_epoch_multithresh_saliency
+##    mv mnist-multithresh_saliency-resnet50/ small_dataset_800_epoch_multithresh_saliency
+##    mv mnist-multithresh_saliency-resnet8/ small_dataset_800_epoch_multithresh_saliency
+##    mv mnist-multithresh_saliency-vgg16/ small_dataset_800_epoch_multithresh_saliency
+##    cd -
+#}
 runsmallergradientguidedbp(){
     #DEBUG=true runsmaller vgg16 cifar-100 multithresh_saliency
     #DEBUG=true runsmaller vgg16 mnist multithresh_saliency
@@ -732,12 +736,133 @@ runsmallernew2(){
     done
     cd -
 }
-runallsmaller16(){
-    DEBUG=true runsmaller vgg16 cifar-10 multithresh_saliency
-    runsmaller vgg16 cifar-100 multithresh_saliency
-    runsmaller vgg16 mnist multithresh_saliency
+#runallsmaller16(){
+#    DEBUG=true runsmaller vgg16 cifar-10 multithresh_saliency
+#    runsmaller vgg16 cifar-100 multithresh_saliency
+#    runsmaller vgg16 mnist multithresh_saliency
+#    }
+#runallsmaller8relu(){
+#    #======================================================================
+#    ## everything but multithresh_saliency
+#    #local use_landataloader=false
+#    #local methodnames_for_smaller_multi_paper=("gradient" "guided_backprop" "grad_cam" "integrated_gradients")
+#    #local CONTINUE=true
+#    #======================================================================
+#    GAME_TYPE=both DEBUG=false runsmaller resnet8_relu cifar-10 
+#    GAME_TYPE=both runsmaller resnet8_relu cifar-100
+#    GAME_TYPE=both runsmaller resnet8_relu mnist
+#    }
+#runallmultismaller8relu(){
+#    GAME_TYPE=both DEBUG=false runsmaller resnet8_relu cifar-10 multithresh_saliency
+#    GAME_TYPE=both runsmaller resnet8_relu cifar-100 multithresh_saliency
+#    GAME_TYPE=both runsmaller resnet8_relu mnist multithresh_saliency
+#    }
+runallguidedsmaller8relu(){
+    #local DBG_LANDATALOADER=1
+    local use_landataloader=false
+    runsmaller resnet8_relu cifar-10 guided_backprop
+    #runsmaller resnet8_relu cifar-100 guided_backprop
+    #runsmaller resnet8_relu mnist guided_backprop
     }
-alias clear2="echo -e \"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\""
+rungametypeablationsmaller(){
+    local DRY_RUN=false
+    local DBG_GAME_ABLATION_MAR8=0
+    local archs=("${archs_for_smaller_multi_paper[@]}")
+    if [ -v ARCH ]; then
+        archs=("$ARCH")
+    fi
+    local datasets=("${smaller_datasets_for_multi_paper[@]}")
+    if [ -v DATASET ]; then
+        datasets=("$DATASET")
+    fi
+    local game_types=("insertion" "deletion")
+    if [ -v GAME_TYPE ]; then
+        game_types=("$GAME_TYPE")
+    fi
+    for arch in "${archs[@]}"; do
+        for dataset in "${datasets[@]}"; do
+            for game_type in "${game_types[@]}"; do 
+                GAME_TYPE=${game_type} DEBUG=false runsmaller $arch $dataset multithresh_saliency
+            done
+        done
+    done
+    #GAME_TYPE=both runsmaller resnet8_relu cifar-100 multithresh_saliency
+    #GAME_TYPE=both runsmaller resnet8_relu mnist multithresh_saliency
+    }
+alias runinsertionvgg16="ARCH=vgg16 GAME_TYPE=insertion rungametypeablationsmaller"
+alias runinsertionresnet8_relu="ARCH=resnet8_relu GAME_TYPE=insertion rungametypeablationsmaller"
+alias rundeletionvgg16="ARCH=vgg16 GAME_TYPE=deletion rungametypeablationsmaller"
+alias rundeletionresnet8_relu="ARCH=resnet8_relu GAME_TYPE=deletion rungametypeablationsmaller"
+alias rundeletionresnet8relucifar100="DATASET=cifar-100 ARCH=resnet8_relu GAME_TYPE=deletion rungametypeablationsmaller"
+alias runinsertionresnet8relucifar100="DATASET=cifar-100 ARCH=resnet8_relu GAME_TYPE=insertion rungametypeablationsmaller"
+alias rundeletionvgg16cifar100="DATASET=cifar-100 ARCH=vgg16 GAME_TYPE=deletion rungametypeablationsmaller"
+alias runinsertionvgg16cifar100="DATASET=cifar-100 ARCH=vgg16 GAME_TYPE=insertion rungametypeablationsmaller"
+runnareasablationsmaller(){
+    local DRY_RUN=false
+    local DBG_N_AREAS_ABLATION_MAR14=0
+    local DEBUG=false
+    local archs=("${archs_for_smaller_multi_paper[@]}")
+    if [ -v ARCH ]; then
+        archs=("$ARCH")
+    fi
+    local datasets=("${smaller_datasets_for_multi_paper[@]}")
+    if [ -v DATASET ]; then
+        datasets=("$DATASET")
+    fi
+    local n_areas=(10 30 40)
+    if [ -v N_AREAS ]; then
+        n_areas=("${N_AREAS}")
+    fi
+        for arch in "${archs[@]}"; do
+            for dataset in "${datasets[@]}"; do
+                for n_areasi in "${n_areas[@]}"; do 
+                    N_AREAS=${n_areasi} DEBUG=${DEBUG} GAME_TYPE="both" runsmaller $arch $dataset multithresh_saliency
+                done
+            done
+        done
+}
+alias runnareas40vgg16cifar100="DATASET=cifar-100 ARCH=vgg16 N_AREAS=40 runnareasablationsmaller"
+
+tmaablationall(){
+local sessions=("t-ablation" "t-ablation2" "t-ablation3" "t-ablation4" "t-ablation5" "t-ablation6" "t-ablation7" "t-ablation8")
+local sess
+for sess in "${sessions[@]}"; do
+    tma $sess
+done
+}
+checkndonegametypeablation(){
+    local dataset
+    local arch
+    local game_type
+
+    local methods=("multithresh_saliency" "multithresh_saliency_game_typedeletion")
+    for dataset in "${smaller_datasets_for_multi_paper[@]}";do
+        for arch in "${archs_for_smaller_multi_paper[@]}";do
+            for method in "${methods[@]}";do
+                local methoddir=${dataset}-${method}-${arch}
+                echo $methoddir
+                ls $TORCHRAYRESULTS/${methoddir} | wc -l
+                done
+            done
+        done
+}
+checkndonenareasablation(){
+    local dataset
+    local arch
+    local game_type=both
+    local n_areass=(10 30 40)
+    local method="multithresh_saliency_game_type${game_type}"
+    for dataset in "${smaller_datasets_for_multi_paper[@]}";do
+        for arch in "${archs_for_smaller_multi_paper[@]}";do
+            for n_areas in "${n_areass[@]}";do
+                local methoddir=${dataset}-${method}_n_areas${n_areas}-${arch}
+                echo $methoddir
+                ls $TORCHRAYRESULTS/${methoddir} | wc -l
+                done
+            done
+        done
+}
+alias clear2="echo -e \"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\""
 function runsmaller() {
     #set -u
     trap "set +u" EXIT
@@ -751,12 +876,12 @@ function runsmaller() {
     #"""
     #methods=("integrated_gradients")
     #methods=("grad_cam" "guided_backprop" "gradient")
-    local save_detailed_results="true"
     #arch="resnet8"
     local arch="$1"
     #dataset="cifar-10"
     local dataset="$2"
-    local methods=("integrated_gradients" "grad_cam" "guided_backprop" "gradient" "multithresh_saliency")
+    #local methods=("integrated_gradients" "grad_cam" "guided_backprop" "gradient" "multithresh_saliency")
+    local methods=("${methodnames_for_smaller_multi_paper[@]}")
     local method="${3}"
     if [ "$method" == "" ];then
        :
@@ -777,12 +902,31 @@ function runsmaller() {
         #dry_run="--start 1000 --end 1004"
     fi
     echo "$dry_run"
+    echo "hi"
+    #..............................................
+    if [ -v use_landataloader ]; then
+        :
+    else
+        local use_landataloader=true
+    fi
     #..............................................
     local PYTHON="python"
     if [ -v DEBUG ] && [ "$DEBUG" == true ]; then
         PYTHON="python -m ipdb -c c"
     fi
-    local base_command="DBG_LANDATALOADER=$DBG_LANDATALOADER $PYTHON examples/attribution_benchmark.py --arch ${arch} --dataset ${dataset} --save_detailed_results ${save_detailed_results} ${dry_run} --metrics deletion_game $continue_ --use_landataloader true"
+
+    local save_detailed_results="true"
+    if [ -v SAVE_DETAILED_RESULTS ]; then
+        save_detailed_results="${SAVE_DETAILED_RESULTS}"
+    fi
+    #..............................................
+    local use_compiled_model=""
+    if [ ${USE_COMPILED_MODEL} == true ]; then
+        use_compiled_model="--use_compiled_model true"
+    fi
+    #..............................................
+
+    local base_command="DBG_LANDATALOADER=$DBG_LANDATALOADER $PYTHON examples/attribution_benchmark.py --arch ${arch} --dataset ${dataset} --save_detailed_results ${save_detailed_results} ${dry_run} --metrics deletion_game $continue_ --use_landataloader ${use_landataloader} ${use_compiled_model}"
     for method in "${methods[@]}";do
         local full_command="$base_command --method $method"
         #echo "Im executing ${full_command}"
@@ -792,7 +936,7 @@ function runsmaller() {
             continue
             #return 1
         fi
-
+        echo ${GAME_TYPE} ${N_AREAS}
         echo ${full_command}
         eval "$full_command"
         #&& cdresults && bash
@@ -880,9 +1024,9 @@ if [[ "$flag" == "y" ]]; then
 alias rungradcamcifar10resnet8="cdelp;pythond examples/attribution_benchmark.py --method grad_cam --arch resnet8 --dataset cifar-10 --metrics deletion_game --save_detailed_results true"
 alias runguidedcifar10resnet8="cdelp;pythond examples/attribution_benchmark.py --method guided_backprop --arch resnet8 --dataset cifar-10 --metrics deletion_game --save_detailed_results true  --continue_ true"
 #================================================================================
-alias traincifar10resnet8="cdcifar;pythond train.py"
-alias traincifar100resnet8="cdcifar;pythond train.py --dataset cifar-100 --epochs 50"
-alias trainmnistresnet8="cdcifar;pythond train.py --dataset mnist --epochs 10"
+alias traincifar10resnet8="cdcifar;pythond train.py --non_lin relu"
+alias traincifar100resnet8="cdcifar;pythond train.py --dataset cifar-100 --epochs 50 --non_lin relu"
+alias trainmnistresnet8="cdcifar;pythond train.py --dataset mnist --epochs 10 --non_lin relu"
 function trainallresnet8(){
 traincifar10resnet8
 traincifar100resnet8
@@ -965,11 +1109,29 @@ function tmn2(){
 # attach to the back ground session ( i.e. bring it foreground)
     }
 alias vimplotdeletion="vim /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/plot_deletion.py"
+
+function summarize_all_deletion_road_multi_game_type_ablation(){
+    local imputation="road"
+    local methods=("multithresh_saliency" "multithresh_saliency_game_typedeletion")
+    #local methodnames_for_smaller_multi_paper=("${methodnames_for_smaller_multi_paper[@]}")
+    #methodnames_for_smaller_multi_paper+=("multithresh_saliency_game_typeboth")
+    #methodnames_for_smaller_multi_paper+=("multithresh_saliency_window_size5_game_typeboth")
+    summarize_all_deletion_small
+}
+
 function summarize_all_deletion_road_small(){
     local imputation="road"
     local methodnames_for_smaller_multi_paper=("${methodnames_for_smaller_multi_paper[@]}")
+    #methodnames_for_smaller_multi_paper+=("multithresh_saliency_game_typeboth")
+    #methodnames_for_smaller_multi_paper+=("multithresh_saliency_window_size5_game_typeboth")
+    summarize_all_deletion_small
+}
+function summarize_all_deletion_road_resnet8relu(){
+    local imputation="road"
+    local methodnames_for_smaller_multi_paper=("${methodnames_for_smaller_multi_paper[@]}")
     methodnames_for_smaller_multi_paper+=("multithresh_saliency_game_typeboth")
-    methodnames_for_smaller_multi_paper+=("multithresh_saliency_window_size5_game_typeboth")
+   #methodnames_for_smaller_multi_paper+=("multithresh_saliency_window_size5_game_typeboth")
+    local archs=("resnet8_relu")
     summarize_all_deletion_small
 }
 function summarize_all_deletion_small(){
@@ -1002,7 +1164,8 @@ function summarize_all_deletion_small(){
     if [ -v archs ]; then
         :
     else
-        local archs=("resnet8" "vgg16")
+        #local archs=("resnet8" "vgg16")
+        local archs=("${archs_for_smaller_multi_paper[@]}")
     fi
     if [ -v ARCH ]; then
        local archs=("$ARCH")
@@ -1166,14 +1329,17 @@ function plotdeletion(){
 }
 function plotallroaddeletionforpaper() {
     local imputation=road
+    #local archs=("resnet8_relu" "vgg16")
+    local archs=("resnet8_relu")
     local methodnames_for_smaller_multi_paper_=("${methodnames_for_smaller_multi_paper[@]}")
     local methodnames_for_smaller_multi_paper=()
     for method in "${methodnames_for_smaller_multi_paper_[@]}"; do
-        if [ $method != "multithresh_saliency" ] && [ $method != "gradient" ]; then
+        #if [ $method != "multithresh_saliency" ] && [ $method != "gradient" ]; then
+        if [ $method != "multithresh_saliency" ]; then
             methodnames_for_smaller_multi_paper+=("$method")
         fi
     done
-    methodnames_for_smaller_multi_paper+=("multithresh_saliency_game_typeboth")
+    #methodnames_for_smaller_multi_paper+=("multithresh_saliency_game_typeboth")
     #methodnames_for_smaller_multi_paper+=("multithresh_saliency_window_size5_game_typeboth")
     plotalldeletion
 }
@@ -1187,7 +1353,11 @@ function plotallroaddeletion() {
     plotalldeletion
 }
 function plotalldeletion() {
-    local archs=("vgg16" "resnet8")
+    if [ -v archs ]; then
+        :
+    else
+        local archs=("vgg16" "resnet8")
+    fi
     #local archs=("resnet8")
     local datasets=("cifar-10" "cifar-100" "mnist")
     if [ -v imputation ]; then
@@ -1214,11 +1384,13 @@ alias workoncomparemasking="while true;do vim -O $multi -O $comparemasking && cd
 
 methodnames_for_imagenet_multi_paper=("scorecam" "grad_cam" "groupcam" "IGOSpp" "extremal_perturbation" "multithresh_saliency")
 # guided vgg16
-methodnames_for_smaller_multi_paper=("gradient" "guided_backprop" "grad_cam" "integrated_gradients" "multithresh_saliency")
+old_methodnames_for_smaller_multi_paper=("gradient" "guided_backprop" "grad_cam" "integrated_gradients" "multithresh_saliency")
+methodnames_for_smaller_multi_paper=("gradient" "guided_backprop" "grad_cam" "integrated_gradients" "multithresh_saliency_game_typeboth")
 multimethods_for_smaller_multi_paper=("multithresh_saliency" "multithresh_saliency_game_typeboth" "multithresh_saliency_window_size5_game_typeboth")
 
 archs_for_imagenet_multi_paper=("vgg16" "resnet50")
-archs_for_smaller_multi_paper=("vgg16" "resnet8")
+old_archs_for_smaller_multi_paper=("vgg16" "resnet8")
+archs_for_smaller_multi_paper=("resnet8_relu" "vgg16")
 smaller_datasets_for_multi_paper=("cifar-10" "cifar-100" "mnist")
 function getmethodnamesmultipaper(){
     echo "methods for imagenet ${methodnames_for_imagenet_multi_paper[@]}"
@@ -1286,14 +1458,59 @@ collectdeletion
 alias workoncollectdeletion="vim  -O $ELP/scripts/collect_deletion.py -O /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/plot_deletion.py;collectdeletion"
 function addtodo2(){
     local msg="$*"
-    local payload='1s/^/'
-    payload+="-$msg"
-    payload+='\n/'
+    #local now=`TZ=Asia/Kolkata date`
+    #local month=`echo "$now" | cut -d " " -f 2`
+    #local day=`echo "$now" | cut -d " " -f 4`
+    #local time=`echo "$now" | cut -d " " -f 5`
+    #local year=`echo "$now" | cut -d " " -f 7`
+    #local timestamp="${day} ${month} ${year} ${time}"
+    ##msg=$(echo -e "$msg" | sed 's/\\\*/\\\\\\\\*\\\/g;s/!/\\\\!/g')
+    ##msg=$(echo -e "$msg" | sed "s/\'/\\\'/g" )
+    #msg="${timestamp} ${msg}"
+#======================================================
+#, tzinfo=timezone(timedelta(hours=-2))
+    local now=`python -c "import pytz;import datetime;kolkata_tz=pytz.timezone('Asia/Kolkata');tstr=datetime.datetime.now(kolkata_tz).strftime('%d %b %Y %H:%M:%S');print(tstr)"`
+    local month=`echo "$now" | cut -d " " -f 2`
+    local day=`echo "$now" | cut -d " " -f 1`
+    local time=`echo "$now" | cut -d " " -f 4`
+    local year=`echo "$now" | cut -d " " -f 3`
+    local timestamp="${day} ${month} ${year} ${time}"
+    msg="${timestamp} ${msg}"
+#======================================================
+    if [ -v addat ]; then
+        :
+    else
+        local addat="1"
+    fi
+    if [ -v todofname ];then
+        :
+    else
+        local todofname="/root/todo2/todo2.dr"
+    fi
+    if [ -v prefix ];then
+        :
+    else
+        local prefix="-"
+    fi
+    local payload="${addat}s"
+    local payload+="/^/"
+    payload+="${prefix}${msg}"
+    payload+="\\n/"
     #local fname="/root/todo2/todo2_bkup"
-    local fname="/root/todo2/todo2"
-    echo $payload
-    sed -i "$payload" $fname
+    #echo $payload
+    #payload=$(printf '%q' "${payload}")
+    #sed -i ${payload} $todofname
+    cmd="sed -i '${payload}' $todofname"
+    eval $cmd
+    clear2
 
+}
+function addhelp(){
+    local args="$*"
+    local todofname="/root/myhelp/help.md"
+    local prefix='#'
+    local addat="\$"
+    addtodo2 $args 
 }
 function setup_smaller_vgg16(){
 cdrunjson 
@@ -1328,11 +1545,19 @@ function createsmallerfileorder() {
 #"""
 alias workondataloaderlocal="vim -O $ELP/torchray/helpers/dataclient.py -O /root/evaluate-saliency-4/elp_with_scales/examples/attribution_benchmark.py -O /root/evaluate-saliency-4/elp_with_scales/examples/attribution_benchmark.py && set-title elp && DBG_LANDATALOADER=1 DRY_RUN=false CONTINUE=false runsmaller vgg16 cifar-10 multithresh_saliency"
 alias vimdataloaderserver="vim -O $ELP/torchray/helpers/dataclient.py -O $ELP/torchray/helpers/dataserver.py -O /root/evaluate-saliency-4/elp_with_scales/examples/attribution_benchmark.py"
+alias vimdataloaderserver="vim -O $ELP/torchray/helpers/dataclient.py -O $ELP/torchray/helpers/dataserver.py"
 alias workondataloaderclient="set-title elp && DBG_LANDATALOADER=1 DRY_RUN=false CONTINUE=false runsmaller vgg16 cifar-10 multithresh_saliency"
 alias ssh113="ssh vast-113"
 alias check_ndone_smaller_vgg16="ARCH=vgg16 METHODNAME=multithresh_saliency check_ndone_smaller_multi" 
 alias vimcollectdeletion="vim $ELP/scripts/collect_deletion.py"
 TORCHRAYMETRICS="/root/bigfiles/other/metrics-torchray"
+TORCHRAYRESULTS="/root/bigfiles/other/results-torchray"
+export TORCHRAYRESULTS2="/root/bigfiles/other/results-torchray2"
+TORCHRAYMETRICS2="/root/bigfiles/other/metrics-torchray2"
+VOCIMAGESDIR="/root/bigfiles/dataset/voc/VOCdevkit/VOCdevkit/VOC2007/JPEGImages"
+IMAGENETIMAGESDIR="/root/bigfiles/dataset/imagenet/images/val"
+DATASETDIR="/root/bigfiles/dataset/"
+VOCANNOTATIONSDIR="/root/evaluate-saliency-4/elp_with_scales/data/datasets/voc/VOCdevkit/VOC2007/Annotations/"
 workonvalidatevgg16(){
     echo """
 . open the cdcifarvgg main.py file
@@ -1382,42 +1607,98 @@ function workonvalidateresnet8(){
     echo ${results_file}
     done
 }
-function workondeletionmultiroad(){
-    local imputation="road"
-    local methods=("${multimethods_for_smaller_multi_paper[@]}")
-    local docollect=false
-    workondeletionsmalldataset
+#workondeletionroadvgg16(){
+#    local archs=("vgg16")
+#    workondeletionroad8relu
+#}
+#function workondeletionroad8relu(){
+#    local imputation="road"
+#    #local methods=("${methodnames_for_smaller_multi_paper[@]}")
+#    local methods=("grad_cam" "gradient" "guided_backprop" "integrated_gradients" "multithresh_saliency_game_typeboth")
+#    #local dummyflag
+#    #read -p "ignoring gradcam, CONTINUE?" dummyflag
+#    #local methods=("gradient" "guided_backprop" "integrated_gradients" "multithresh_saliency_game_typeboth")
+#    #local methods=("multithresh_saliency_game_typeboth")
+#    if [ -v archs ]; then
+#        :
+#    else
+#        local archs=("resnet8_relu")
+#    fi
+#    #local datasets=("cifar-10" "cifar-100")
+#    #local datasets=("mnist")
+#    local docollect=false
+#    workondeletionsmalldataset
+#
+#}
+#function workongradcamdeletionroad8relu(){
+#    local imputation="road"
+#    #local methods=("${methodnames_for_smaller_multi_paper[@]}")
+#    local methods=("grad_cam")
+#    #local methods=("multithresh_saliency_game_typeboth")
+#    local archs=("resnet8_relu")
+#    #local datasets=("cifar-10" "cifar-100")
+#    #local datasets=("mnist")
+#    local docollect=false
+#    workondeletionsmalldataset
+#
+#}
 
+
+#function workondeletionmultiroad(){
+#    local imputation="road"
+#    local methods=("${multimethods_for_smaller_multi_paper[@]}")
+#    local docollect=false
+#    workondeletionsmalldataset
+#
+#}
+
+function workondeletionsmalldatasetroadmultiablation() {
+    local imputation="road"
+    local methods=("multithresh_saliency" "multithresh_saliency_game_typedeletion") 
+    #local methods=("multithresh_saliency_game_typedeletion") 
+    local docollect=true
+    workondeletionsmalldataset
 }
+
+
 function workondeletionsmalldatasetroad() {
     local imputation="road"
+    local docollect=false
     workondeletionsmalldataset
 }
 
 function workondeletionsmalldataset(){
-local archs=("${archs_for_smaller_multi_paper[@]}")
-if [ -v methods ];then
-    :
-else
-local methods=("${methodnames_for_smaller_multi_paper[@]}")
-methods+=("multithresh_saliency_game_typeboth")
-methods+=("multithresh_saliency_window_size5_game_typeboth")
-        fi
-local max_blur=7
-local datasets=("${smaller_datasets_for_multi_paper[@]}")
-if [ -v imputation ]; then
-    :
-else
-    local imputation="blur"
-fi
-echo "${methods[@]}"
-echo "${archs[@]}"
-local dataset
-for dataset in "${datasets[@]}"; do
-    echo $dataset $imputation
-    workondeletionlargedataset
-    #dataset=dataset workondeletionlargedataset
-done
+    local max_blur=7
+    if [ -v archs ]; then
+        :
+    else
+        local archs=("${archs_for_smaller_multi_paper[@]}")
+    fi
+    if [ -v methods ];then
+        :
+    else
+        local methods=("${methodnames_for_smaller_multi_paper[@]}")
+        methods+=("multithresh_saliency_game_typeboth")
+        methods+=("multithresh_saliency_window_size5_game_typeboth")
+    fi
+    if [ -v datasets ]; then
+        :
+    else
+        local datasets=("${smaller_datasets_for_multi_paper[@]}")
+    fi
+    if [ -v imputation ]; then
+        :
+    else
+        local imputation="blur"
+    fi
+    echo "${methods[@]}"
+    echo "${archs[@]}"
+    local dataset
+    for dataset in "${datasets[@]}"; do
+        echo $dataset $imputation
+        workondeletionlargedataset
+        #dataset=dataset workondeletionlargedataset
+    done
     }
 function workondeletionlargedataset(){
 echo """
@@ -1476,13 +1757,13 @@ local method
 local arch
 for method in "${methods[@]}";do
     for arch in "${archs[@]}";do
-	#if [ "$method" == "grad_cam" ] && [ "$dataset" == "imagenet-5000" ]; then
+    #if [ "$method" == "grad_cam" ] && [ "$dataset" == "imagenet-5000" ]; then
     #    :
     #else
     #    echo "CONTINUING non gradcam"
-	#	continue
+    #   continue
 
-	#fi
+    #fi
     #==============================================================================================================================
     #PYTHON="python -m ipdb -c c"
     local PYTHON="python"
@@ -1545,6 +1826,7 @@ local desc="where_multi_beter"
 #createimrootsforvisualize
 local bestfile=where_multi_beter_anchor_multithresh_saliency_arch_${model}_imroots_and_class_ids
 local methodnames=("${methodnames_for_imagenet_multi_paper[@]}")
+methodnames+=("multithresh_saliency_game_typeboth")
 local archs=("${archs_for_imagenet_multi_paper[@]}")
 collectimagesforpaper 
 }
@@ -1631,17 +1913,25 @@ renamemultiwithgame(){
     done
 done
 }
-alias vimmultidiary="vim /root/evaluate-saliency-4/ICIP-Multithreshold-saliency/diary/feb8"
+alias vimmultidiary="vim $papersdir/ICIP-Multithreshold-saliency/diary/feb8"
 alias icipinfo="""echo '''
 1737 92BA9AEB
-Immediately Reject on Regular & Special Session Paper Notification 	March 1, 2024
-Paper Acceptance Notification (including workshops) 	June 6, 2024
-Author Registration Deadline (including workshops) 	July 11, 2024
+Immediately Reject on Regular & Special Session Paper Notification  March 1, 2024
+Paper Acceptance Notification (including workshops)     June 6, 2024
+Author Registration Deadline (including workshops)  July 11, 2024
 '''
 """
+#alias ppt="echo 'Z3432452'"
+#alias pptdate="echo 'issue:16/10/2015 expiry:15/10/2025'"
+alias pptinfo="echo 'Z3432452 issue:16/10/2015 expiry:15/10/2025'"
+alias icasspinfo="echo '4010 98157EDE'"
 alias fakeicipdetails="echo '2785 E4DC0B61'"
 866 1129
 alias vimerc="vimtodo erc"
+function vimwhy(){
+local fname="$1"
+vimtodo ${fname}.dr
+}
 alias workoncreatedeletiontable="cdmetrics && vim create_deletion_table.py && pythond create_deletion_table.py"
 alias evall="eval "
 alias lsd="ls -d "
@@ -1659,10 +1949,338 @@ function httppath(){
 alias vimresearch="vimtodo research"
 alias fastapiaudiorecordertoken="echo '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'"
 alias eccvinfo="""echo '''
-Abstract registration deadline 	Feb 29 24 10:00 PM CET * 	02 weeks 03 days 04:56:42
-Submission Deadline 	Mar 07 24 10:00 PM CET * 	03 weeks 03 days 04:56:42
-Supplementary materials deadline 	Mar 14 24 09:00 PM CET * 	04 weeks 03 days 03:56:42
+Abstract registration deadline  Feb 29 24 10:00 PM CET *    02 weeks 03 days 04:56:42
+Submission Deadline     Mar 07 24 10:00 PM CET *    03 weeks 03 days 04:56:42
+Supplementary materials deadline    Mar 14 24 09:00 PM CET *    04 weeks 03 days 03:56:42
+2129
 '''"""
+codedir="/root/evaluate-saliency-4"
+papersdir="$codedir/papers"
+thesisdir="$papersdir/Thesis_proposal"
+eccvdir="$papersdir/ECCV_multithreshold_saliency"
+alias cdthesis="cd $thesisdir"
+alias cdpapers="cd $papersdir"
+tikzdir="$papersdir/practice-tikz"
+alias cdtikz="cd $tikzdir"
+alias cdeccv="cd $eccvdir"
+alias workoneccv="vim -O /root/evaluate-saliency-4/papers/ECCV_multithreshold_saliency/eccv2016submission.tex -O /root/evaluate-saliency-4/papers/ECCV_multithreshold_saliency/paper.tex"
+alias vimmultilosses="vim /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency/losses.py"
+alias vimmultisaver="vim /root/evaluate-saliency-4/multithresh-saliency/multithresh_saliency/saver.py"
+function workoncompile(){
+#vimattribution
+cdelp
+vim /root/evaluate-saliency-4/elp_with_scales/torchray/helpers/dataserver.py
+vim -O /root/evaluate-saliency-4/elp_with_scales/examples/attribution_benchmark.py -O /root/evaluate-saliency-4/elp_with_scales/torchray/attribution/grad_cam.py -O /root/evaluate-saliency-4/elp_with_scales/torchray/attribution/common.py
+python -m ipdb -c c examples/attribution_benchmark.py --method grad_cam --start 0 --end 5000  --arch vgg16 --dataset voc_2007 --use_compiled_model true
+}
+alias cdcodingpractice="cd /root/evaluate-saliency-4/coding-practice"
+alias loadvgg16="python /root/evaluate-saliency-4/dutils/dutils/load_vgg16.py"
+function workondropout(){
+cdmulti
+#vim -O run_dropout_saliency.py -O multithresh_saliency_.py
+vim -O run_dropout_saliency.py
+pythond run_dropout_saliency.py
+cd -
+}
+function findq(){
+local curdir=`pwd`
+local dirname="${1:-$curdir}"
+find . -type f -name "*.js" -print0 | xargs -0 grep -n "//?"
+find . -type f -name "*.py" -print0 | xargs -0 grep -n "#?"
+find . -type f -name "*.json1" -print0 | xargs -0 grep -n "#?"
+find . -type f -name "*.html" -print0 | xargs -0 grep -n "<!--?"
+find . -type f -name "*.html" -print0 | xargs -0 grep -n "//?"
+}
+# we need to use the function read_torchray_result from the python library dutils 
+# you will cll the bash function as "readpkl 1000.xz"
+function comparegradientguided(){
+cdresults
+impath="0/cat3.xz"
+readpkl cifar-10-guided_backprop-resnet8/${impath} guided.png
+readpkl cifar-10-gradient-resnet8/${impath} gradient.png
+cd -
+}
+function readpkl(){
+local fname="$1"
+local savename=${2:-"saliency.png"}
+python -c """
+from dutils import read_torchray_result;
+read_torchray_result('$fname','$savename')
+"""
+}
+alias pythonc="python -c"
+function workonelpselfsaliency(){
+curdir=`pwd`
+cdattribution
+vim -O $MULTI/run_self_saliency.py -O extremal_perturbation_for_self_saliency.py
+cdmulti
+python run_self_saliency.py
+cd $curdir
+}
+alias vimdrsyntax="vim  ~/.vim/syntax/dr.vim"
+function workonvim(){
+vim -O ~/.vim/ftdetect/dr.vim  ~/.vim/syntax/dr.vim 
+vim --startuptime /root/vimstartup.log ~/todo/trydr.dr
+vim /root/vimstartup.log
+}
+alias vimcolors="vim /root/myhelp/vimcolors"
+alias vimtodocommands="vim /root/todo2/todocommands.sh"
+source /root/todo2/todocommands.sh
+alias cdaudiorecorder="cd /root/evaluate-saliency-4/coding-practice/record_audio"
+facealignment="/root/evaluate-saliency-4/face-alignment"
+alias cdfacealignment="cd ${facealignment}"
+function diagnosegradientguided(){
+#cdresults
+#impath="0/cat3.xz"
+#readpkl cifar-10-guided_backprop-resnet8/${impath} guided.png
+#readpkl cifar-10-gradient-resnet8/${impath} gradient.png
+#cd -
+local dataset="cifar-10"
+local methods=("guided_backprop" "gradient")
+local method
+for method in ${methods[@]}; do 
+    DBG_VISUALIZE=1 pythond examples/attribution_benchmark.py --method $method --start 0 --end 1 --arch resnet8 --dataset $dataset --save_detailed_results false --metrics deletion_game --use_landataloader false
+done
+}
+alias sshh="ssh "
+function tmaall8rel(){
+local instances=("vast-112d" "vast-113" "vast-114")
+tma t-resnet8
+tma t-resnet8-2
+local instance
+for instance in "${instances[@]}"; do
+    sshh $instance -t "source /root/.bashrc;tmux a -t t-resnet8; tmux a -t t-resnet8-2"
+done
+
+}
+createdeletiontable="/root/bigfiles/other/metrics-torchray/create_deletion_table.py"
+alias runcreatedeletiontable="python $createdeletiontable"
+#sysctl fs.inotify.max_user_watches=524288
+
+alias cdcontrolnetmodels="cd /root/evaluate-saliency-4/coding-practice/stable-diffusion-webui/extensions/sd-webui-controlnet/models"
+alias cdfontstyle="cd /root/evaluate-saliency-4/coding-practice/font-style-transfer"
+alias vimsdenv="vim /root/evaluate-saliency-4/coding-practice/stable-diffusion-webui/venv/bin/activate"
+alias startsdenv="source /root/evaluate-saliency-4/coding-practice/stable-diffusion-webui/venv/bin/activate"
+alias rclonefontimages="rclone copy aniketsinghresearch-gdrive:misc-tasks/ misc-tasks"
+alias getsammodel="wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth"
+samdir="/root/evaluate-saliency-4/coding-practice/font-style-transfer/segment-anything"
+alias cdsam="cd $samdir"
+alias vibesbbx="echo [[6.0, 1.0], [117.0, 5.0], [116.0, 48.0], [4.0, 46.0]]"
+function rcloneget(){
+    local src="$1"
+    local tgt="$2"
+    rclone copy -P aniketsinghresearch-gdrive:${src} ${tgt}
+    }
+alias vimgpnn="vim /root/evaluate-saliency-4/coding-practice/font-style-transfer/GPNN/model/gpnn.py"
+workonwindowsizeforvgg16(){
+    cdresults
+ vim visually_check_windowsize_for_vgg16.py && python visually_check_windowsize_for_vgg16.py 
+ cd -
+    }
+workondebuggradcamdeletion()
+{
+    cdmetrics
+    vim debug_gradcam_deletion_issue.py && python debug_gradcam_deletion_issue.py
+    cd -
+}
+alias vimcreatetable="vim /root/bigfiles/other/metrics-torchray/create_deletion_table.py"
+function createtable(){
+    cdmetrics
+    python  /root/bigfiles/other/metrics-torchray/create_deletion_table.py
+    cd -
+}
+
+function createtablemultiablation(){
+    cdmetrics
+    python  /root/bigfiles/other/metrics-torchray/create_deletion_table.py --methods multithresh_saliency multithresh_saliency_game_typedeletion multithresh_saliency_game_typeboth
+    cd -
+}
+
+startdataserver(){
+    cd /root/evaluate-saliency-4/elp_with_scales/torchray/helpers
+    uvicorn dataserver:app --host 0.0.0.0 --reload --port 14000
+}
+alias lsl="ls -l "
+addsaifkey(){
+#echo """
+#ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDaFM3oxWUDeSo81Ge4XtwfshEQGXvIZu1CTLo2TYxid4bJiHx8Purgq/q+U1PFq4U+52IupZDKYni/gzNzg4eLapt0Wa++vK/OBVkBZl5fFfr0O4fKvSaMb1c8EXgEB6uPfxJfQxZ/mSFoOGwTF3t20BFiH6arXOYp5T8FKR7fyctWgsPOwe3KJE1Dmn/Sunfv4WF75SqEQEi9G2jxxUyVq6xQHehG7p8i1nAZ6okCMFg93Fjeu2Kq5jWV2AnYZZ8/KHV48N0iMEuIO3XbQb/aSBuF1+aZRgMJm+3vCZb5Rv+IB2yfap0yiADeXbVWcODIOzNyN5hg0NIqZ45AXCjv user@user-HP-Laptop-15-bs1xx
+#"""
+echo """
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCek+TOV7twqTVKsizdCWiVmkF9xsvXPyTHpvHJ40HDdh5ch0+jNvVcHa1Q2TxjpRi1pADmw9hQZinLfzyOFd3h7pfPEGi98GbPQQl77oZ/ZsnctjhgZdhh0C9VuMRXgBRsI4OMELkM38bEKFfJQoe16+psxZxM/Yqa5AJ0pk4wfd3ybRdQIBN5tZkg5rDSdiAQzQ2mxDdVXS4ANjaz46Xqq6GD/H85zKGZ83uUJWdsVqcdTEcwRJbMPvwulPsomPGznNYhALY9vAxjHWMoB3GcXseZzJ245BnHVCTQn+6T7RznNG6FGOdvT3LrNdSPn3unBk5mbiLFKv/IHsJmbNi8A0a5sGEi/xKjsN3ngulr4lgw97oJ6AyV5V4Ss+cPUl7NFk1NSe56N0yDixkHVZDXEPHVEwn+5w3s7E5JSDrvkzwOgoiknzcXJ+sS7tFRjBaPfd4fEo4X6ouDmA0vliXy9fE7fyrIC1hqGQ6sxzAu3Y8zB050bbC5isvbnb9v62MZ9Nf+avto59hvE9BLJ+RGXdPf//w9cojkmum36W2G1sIdrKuvz9sDRxzUkPYkZHntq0ax89zDDtLSmCRqX2k4GzApsAS1PVJlQK2C8l2fDtVslgAPekdWbILyoPrOg1/gwzAauhiCyx+oweOWauayPrDCfMWaedY0UB0BmwdYUQ== bagmarusaif@gmail.com
+""">> ~/.ssh/authorized_keys
+    }
+alias adr="echo '605580965950'"
+alias koreavisapplication="echo 'MU24ON005546 recept: 240312-13'"
+checkndoneimagenet(){
+    cdresults
+    for d in `lsd *imagenet*`;do echo $d; ls $d | wc -l; done
+    cd -
+    # TODO
+    # IGOSpp
+    # extremal_perturbation
+    # groupcam
+    # rise
+
+}
+runlarger(){
+    local DRY_RUN=false
+    local archs=("${archs_for_imagenet_multi_paper[@]}")
+    if [ -v ARCH ]; then
+        archs=("$ARCH")
+    fi
+    local datasets=("imagenet-5000")
+    if [ -v DATASET ]; then
+        datasets=("$DATASET")
+    fi
+    #local GAME_TYPE=both
+    #local methods=("extremal_perturbation" "IGOSpp" "scorecam" "grad_cam" "groupcam" "rise" "gradient" "guided_backprop")
+    if [ -v methods ]; then 
+        :
+    else
+        local methods
+        if [ -v METHOD ]; then 
+            methods=("${METHOD}")
+        else
+            methods=("extremal_perturbation" "IGOSpp")
+        fi
+        #local methods=("rise" "groupcam")
+    fi
+    local method
+    local arch
+    local dataset
+    for arch in "${archs[@]}"; do
+        for dataset in "${datasets[@]}"; do
+            for method in "${methods[@]}"; do
+                GAME_TYPE=${GAME_TYPE} DEBUG=false runsmaller $arch $dataset $method
+                done
+        done
+    done
+    #GAME_TYPE=both runsmaller resnet8_relu cifar-100 multithresh_saliency
+    #GAME_TYPE=both runsmaller resnet8_relu mnist multithresh_saliency
+    }
+
+workoncomparecompiled(){
+    vim /root/bigfiles/other/results-torchray/compare_compiled_non_compiled.py
+    python /root/bigfiles/other/results-torchray/compare_compiled_non_compiled.py
+}
+
+fixrsyncnewdir(){
+    local d=$1
+    local basef=`basename $d`
+    local parent=`dirname $d`
+    if [ -f ${d}/${basef} ]; then
+        :
+    else
+        echo "${d}/${basef} not found"
+        return 1
+    fi
+
+    local newd=${d}_dir
+    mv $d ${newd}
+    mv ${newd}/${basef} ${parent} 
+    rmdir $newd
+
+}
+alias aniketsahanumber="echo '+919674917970'"
+icprinstructions(){
+    echo """
+
+Springer LNCS format with maximum 15 pages (including references) during paper submission. To take care of reviewers' comments, one more page is allowed (without any charge) during revised/camera ready submission. Moreover, authors may purchase up to 2 extra pages. Extra page charges must be paid at the time of registration.
+
+
+ICPR-2024 will follow a single-blind review process. Authors can include their names and affiliations in the manuscript.
+
+
+By the submission deadline, the authors may optionally submit additional material that was ready at the time of paper submission but could not be included due to constraints of format or space. The authors should refer to the contents of the supplementary material appropriately in the paper. Reviewers will be encouraged to look at it, but are not obligated to do so.
+
+Supplementary material may include videos, proofs, additional figures or tables, more detailed analysis of experiments presented in the paper. There is no page limit for the supplementary materials but only one file with maximum file size of 50 MB is allowed for submission.
+
+We encourage (if possible) authors to upload their code as part of their supplementary material in order to help reviewers assess the quality of the work.
+
+
+Reproducibility: Authors should put every effort possible to make the submission reproducible. We highly encourage authors to voluntarily submit their code as part of supplementary material, especially if they plan to release it upon acceptance. Reviewers may optionally check this code to ensure the paper's results are reproducible and trustworthy, but are not required to. We expect (but do not require) that the accompanying code will be submitted with accepted papers.
+"""
+}
+icprelpdir="/root/evaluate-saliency-4/papers/ICPR_elp_with_scales"
+mdpielpdir="/root/evaluate-saliency-4/papers/MDPI_elp_with_scales"
+alias cdicprelp="cd $icprelpdir"
+alias cdmdpielp="cd $mdpielpdir"
+alias vimmdpielp="vim $mdpielpdir/mdpi_elp_with_scales.tex"
+latexicprelp(){
+    curdir=`pwd`
+    cdpapers
+    cd ICPR_elp_with_scales
+    pdflatex icpr_multiscale_saliency.tex
+    bibtex icpr_multiscale_saliency
+    pdflatex icpr_multiscale_saliency
+    cd $curdir
+    }
+uploadicprelp(){
+    curdir=`pwd`
+    cdpapers
+    cd ICPR_elp_with_scales
+    rclone copy -Pv icpr_multiscale_saliency.pdf aniketsinghresearch-gdrive:my-papers
+    cd $curdir
+    }
+latexmdpielp(){
+    curdir=`pwd`
+    cdpapers
+    cd MDPI_elp_with_scales
+    pdflatex mdpi_elp_with_scales.tex
+    bibtex mdpi_elp_with_scales
+    pdflatex mdpi_elp_with_scales
+    cd $curdir
+    }
+
+alias vimfood="vimtodo2 food"
+alias linkedinnew="echo 'email id : work1.kousik@gmail.com Password : Qwerty@332211'"
+runelp(){
+#!/bin/bash
+#donedir="/root/evaluate-saliency-4/elp_with_scales/scripts/done_filelists"
+#tmux kill-session -t t-imagenet_vgg16
+if [ -v METHOD ];then
+    :
+else
+    local METHOD="extremal_perturbation"
+fi
+
+if [ -v ARCH ];then
+    :
+else
+    local ARCH="resnet50"
+fi
+
+if [ -v DATASET ];then
+    :
+else
+    local DATASET="voc_2007"
+fi
+
+if [ -v SEED ];then
+    :
+else
+    local SEED=0
+fi
+
+if [ -v RNG ];then
+    local RNG_ARG="--rng $RNG"
+else
+    local RNG_ARG=""
+fi
+
+cdelp
+DBG_ELP_SEED_MAR21=${DBG_ELP_SEED_MAR21:-0} pythond examples/attribution_benchmark.py --method $METHOD --dataset $DATASET --arch $ARCH --save_detailed_results True --seed $SEED ${RNG_ARG}
+}
+alias runelpresnet50seed1="SEED=1 runelp"
+alias runelpresnet50seed2="SEED=2 runelp"
+alias runelpvgg16seed1="ARCH=vgg16 SEED=1 runelp"
+alias runelpvgg16seed2="ARCH=vgg16 SEED=2 runelp"
+
+alias runelpcropswresnet50rng0="DBG_ELP_SEED_MAR21=1 RNG=0 METHOD=extremal_perturbation_with_simple_scale_and_crop_normalized runelp"
+alias runelpcropswresnet50rng2="DBG_ELP_SEED_MAR21=1 RNG=2 METHOD=extremal_perturbation_with_simple_scale_and_crop_normalized runelp"
+alias runelpcropswvgg16rng0="DBG_ELP_SEED_MAR21=1 ARCH=vgg16 METHOD=extremal_perturbation_with_simple_scale_and_crop_normalized RNG=0 runelp"
+alias runelpcropswvgg16rng2="DBG_ELP_SEED_MAR21=1 ARCH=vgg16 METHOD=extremal_perturbation_with_simple_scale_and_crop_normalized RNG=2 runelp"
+
 #ADDNEW
 function vimallrun(){
     local curdir=`pwd`
